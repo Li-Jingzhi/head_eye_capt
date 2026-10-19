@@ -1,0 +1,46 @@
+{
+  "preview_records": 420,
+  "both_eyes_detected": 420,
+  "both_eyes_detection_fraction": 1.0,
+  "strict_measurement_pass_records": 2,
+  "reasons": {
+    "waiting for source AND arrival <=10ms stereo pair": 418,
+    "ok": 2
+  },
+  "continuous_preview_fps_observed": 11.98,
+  "camera_policy_current": "auto5s_then_lock_ae_awb_50Hz",
+  "current_controls": [
+    {
+      "aelock": true,
+      "awblock": true,
+      "aeantibanding": 2,
+      "exposuretimerange": "None",
+      "gainrange": "None",
+      "ispdigitalgainrange": "None",
+      "wbmode": 1,
+      "tnr-mode": 1,
+      "tnr-strength": -1.0,
+      "ee-mode": 1,
+      "ee-strength": -1.0,
+      "saturation": 1.0
+    },
+    {
+      "aelock": true,
+      "awblock": true,
+      "aeantibanding": 2,
+      "exposuretimerange": "None",
+      "gainrange": "None",
+      "ispdigitalgainrange": "None",
+      "wbmode": 1,
+      "tnr-mode": 1,
+      "tnr-strength": -1.0,
+      "ee-mode": 1,
+      "ee-strength": -1.0,
+      "saturation": 1.0
+    }
+  ],
+  "old_policy_record": null,
+  "old_actual_exposure_gain_recorded": false,
+  "actual_exposure_sensor_metadata_available": false,
+  "remaining_issue": "Free-running source timing may prevent strict <=10ms3D sampling; preview fixes do not change sample acceptance"
+}

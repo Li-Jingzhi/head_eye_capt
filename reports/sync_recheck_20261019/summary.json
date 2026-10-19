@@ -1,0 +1,14 @@
+{
+  "records": 413,
+  "passed": 133,
+  "pass_fps": 3.8,
+  "received": [
+    1049,
+    1049
+  ],
+  "matched": 159,
+  "source_skew_ms": [
+    3.485724,
+    9.995861
+  ]
+}

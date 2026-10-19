@@ -1,0 +1,6 @@
+exposure: 19999
+gain: 148
+trig_mode: 0
+exposure: 19999
+gain: 138
+trig_mode: 0

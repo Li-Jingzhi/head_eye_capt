@@ -1,0 +1,109 @@
+{
+  "quality": "REJECT",
+  "reason": "waiting for source AND arrival <=10ms stereo pair",
+  "pairing_stats": {
+    "received": [
+      2031,
+      2032
+    ],
+    "matched_pairs": 206,
+    "unmatched_drops": [
+      1817,
+      1819
+    ],
+    "overflow_drops": [
+      0,
+      0
+    ],
+    "arrival_gate_drops": [
+      7,
+      7
+    ]
+  },
+  "exposure_locked": true,
+  "awb_locked": true,
+  "exposure_time_valid": false,
+  "measurement_pair_valid": false,
+  "preview": {
+    "candidate_counts": [
+      1,
+      1
+    ],
+    "left": {
+      "center": [
+        619.358320236206,
+        568.8295078277588
+      ],
+      "ellipse": {
+        "cx": 619.358320236206,
+        "cy": 568.8295078277588,
+        "major_px": 48.10369873046875,
+        "minor_px": 46.62588882446289,
+        "angle_deg": 116.3356876373291
+      },
+      "edge_count": 109,
+      "ellipse_rms_px": 0.16418781485385545,
+      "edge_coverage_deg": 330.0
+    },
+    "right": {
+      "center": [
+        689.3772106170654,
+        568.8598403930664
+      ],
+      "ellipse": {
+        "cx": 689.3772106170654,
+        "cy": 568.8598403930664,
+        "major_px": 47.94940948486328,
+        "minor_px": 46.85319519042969,
+        "angle_deg": 74.35731506347656
+      },
+      "edge_count": 112,
+      "ellipse_rms_px": 0.1878487523191179,
+      "edge_coverage_deg": 310.0
+    },
+    "display_only": true,
+    "asynchronous_pair": true,
+    "source_clock_skew_ms": 11.391205,
+    "arrival_skew_ms": 11.167301
+  },
+  "camera_control_policy": "auto5s_then_lock_ae_awb_50Hz",
+  "camera_controls_readback": [
+    {
+      "aelock": true,
+      "awblock": true,
+      "aeantibanding": 2,
+      "exposuretimerange": "None",
+      "gainrange": "None",
+      "ispdigitalgainrange": "None",
+      "wbmode": 1,
+      "tnr-mode": 1,
+      "tnr-strength": -1.0,
+      "ee-mode": 1,
+      "ee-strength": -1.0,
+      "saturation": 1.0
+    },
+    {
+      "aelock": true,
+      "awblock": true,
+      "aeantibanding": 2,
+      "exposuretimerange": "None",
+      "gainrange": "None",
+      "ispdigitalgainrange": "None",
+      "wbmode": 1,
+      "tnr-mode": 1,
+      "tnr-strength": -1.0,
+      "ee-mode": 1,
+      "ee-strength": -1.0,
+      "saturation": 1.0
+    }
+  ],
+  "sensor_actual_exposure_available": false,
+  "strict_sample_fps": 2.5890942735215803,
+  "sensor_ids": [
+    "left:csi://8",
+    "right:csi://0"
+  ],
+  "source_calibration_sha256": "65114bda1bc22c954af538e1a710ccd1ec4fb26f2f24f8f9f6da01516d1a80be",
+  "stereo_model_sha256": "aeb16f4fa40c1be996475bdcb3fd7a602f4fe1fcfb26711348c86071f2153a09",
+  "local_receive_monotonic_ns": 39675842290292
+}

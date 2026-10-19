@@ -1,0 +1,26 @@
+{
+  "records": 418,
+  "quality_counts": {
+    "PASS": 418
+  },
+  "arrival_skew_p95_ms": 8.670570199999998,
+  "source_clock_skew_p95_ms": 9.3227154,
+  "arrival_skew_max_ms": 9.998582,
+  "source_clock_skew_max_ms": 9.921787,
+  "interval_received": [
+    1043,
+    1049
+  ],
+  "interval_matched_pairs": 999,
+  "interval_pairing_fraction": 0.9578139980824545,
+  "interval_source_unmatched_drops": [
+    31,
+    37
+  ],
+  "interval_arrival_gate_drops": [
+    13,
+    13
+  ],
+  "clock_basis": "single GStreamer pipeline base_time+PTS and callback-entry monotonic arrival",
+  "exposure_sync_verified": false
+}

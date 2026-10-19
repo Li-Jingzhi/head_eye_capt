@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+data/*.jsonl
+runtime/
+*.log
+.planning/
+archives/
+data/raw_chessboard_*/
+stereo_camera_launcher/.deps/
+
+# Local acquisition sessions and generated evidence
+/data/
+/runtime/
+*.jsonl
+/reports/**/*.jpg
+/reports/**/*.png
+.env
+.env.*
+*.pem
+*.key

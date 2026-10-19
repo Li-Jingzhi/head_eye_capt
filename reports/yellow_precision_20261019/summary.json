@@ -1,0 +1,47 @@
+{
+  "total_frames": 420,
+  "passed_frames": 202,
+  "pass_fraction": 0.48095238095238096,
+  "rejection_reasons": {
+    "dequeue skew >10ms": 218
+  },
+  "median_xyz_left_camera_m": [
+    -0.03623666331980499,
+    0.07064966903655331,
+    0.34093657401613875
+  ],
+  "median_signed_disparity_px": -69.74868478871099,
+  "disparity_abs_deviation_p95_px": 0.07921920584225857,
+  "xyz_radius_about_median_p95_mm": 0.38747626688762377,
+  "axis_abs_deviation_p95_mm": [
+    0.030341730519526166,
+    0.05236731915376699,
+    0.38451891295976637
+  ],
+  "epipolar_absolute_p95_px": 0.2642732196376983,
+  "epipolar_median_signed_px": -0.21680850299810572,
+  "ellipse_rms_p95_px": {
+    "left": 0.2194507438439951,
+    "right": 0.20373459998576676
+  },
+  "minimum_edge_coverage_deg": {
+    "left": 280.0,
+    "right": 300.0
+  },
+  "pair_skew_all_p95_ms": 24.715809099999994,
+  "pair_skew_pass_p95_ms": 9.867105599999999,
+  "depth_mm_per_disparity_pixel": 4.888030543534691,
+  "disparity_pixels_corresponding_to_1mm": 0.20458137302817836,
+  "nonoverlapping_50_frame_blocks": 4,
+  "max_distance_between_block_medians_mm": 0.10073074764584475,
+  "mean_image_luma_p95_deviation": {
+    "left": 0.20722230972782385,
+    "right": 0.1727859989289122
+  },
+  "unique_source_pairs": 202,
+  "assumed_ball_diameter_m": 0.04,
+  "diameter_independently_measured": false,
+  "camera_stationary_joint_feedback_verified": false,
+  "verified_exposure_synchronization": false,
+  "conclusion": "Single-point static repeatability passes1mm; absolute/workspace/FK accuracy NOT validated"
+}

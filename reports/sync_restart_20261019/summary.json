@@ -1,0 +1,31 @@
+{
+  "records": 419,
+  "passed": 417,
+  "pass_fps": 11.914285714285715,
+  "windows5s": [
+    58,
+    60,
+    60,
+    59,
+    59,
+    60,
+    60
+  ],
+  "received": [
+    1049,
+    1050
+  ],
+  "matched": 981,
+  "pair_source_clock_skew_ms": {
+    "p95": 9.4530856,
+    "max": 9.933015
+  },
+  "pair_dequeue_skew_ms": {
+    "p95": 8.5140088,
+    "max": 9.878807
+  },
+  "reasons": {
+    "waiting for source AND arrival <=10ms stereo pair": 2,
+    "ok": 417
+  }
+}
