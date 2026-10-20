@@ -1,0 +1,19 @@
+{
+  "robot_ip": "192.168.12.190",
+  "arm_side": "left",
+  "arm_index": 0,
+  "sdk_version": "00040701",
+  "mdh_source": "/home/lijingzhi/Project/Learned_IK/head_eye_pro/configs/1004.ini:R.A0",
+  "mdh_sha256": "c8d0634e66a697a19fbbb1c15f177106ad13764907ad934ff6138138183918bc",
+  "stereo_model_sha256": "aeb16f4fa40c1be996475bdcb3fd7a602f4fe1fcfb26711348c86071f2153a09",
+  "source_calibration_sha256": "65114bda1bc22c954af538e1a710ccd1ec4fb26f2f24f8f9f6da01516d1a80be",
+  "image_size": [
+    1280,
+    992
+  ],
+  "sensor_ids": [
+    "left:csi://8",
+    "right:csi://0"
+  ],
+  "pixel_domain": "ideal_pinhole"
+}

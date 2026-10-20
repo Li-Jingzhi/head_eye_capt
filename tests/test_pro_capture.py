@@ -58,7 +58,7 @@ class CaptureTest(unittest.TestCase):
             if capture.stop:raise KeyboardInterrupt
         capture.teach.side_effect=teach;capture.wait_camera.side_effect=camera
         capture.feedback.return_value=(np.zeros(7),np.zeros(7),1)
-        capture.limits=np.array([[-170,170]]*7);capture.path=Path('taught.json')
+        capture.limits=np.array([[-170,170]]*7);capture.path=Path('taught.json');capture.arm_side='right'
         with patch.object(pro_capture,'Capture',return_value=capture),patch.object(sys,'argv',['capture']),patch('builtins.input',return_value='RUN'):
             pro_capture.main()
         capture.replay.assert_called_once_with([dict(q7_deg=[0.]*7)])
@@ -68,6 +68,7 @@ class CaptureTest(unittest.TestCase):
         c=Capture.__new__(Capture);c.directory=Path(directory);c.path=c.directory/'taught.json'
         c.output=c.directory/'capture.jsonl';c.provenance={};c.stop=False;c.terminate=False
         c.limits=np.array([[-170,170]]*7);c.arm=1;c.owned=False;c.rows=np.zeros((8,4))
+        c.arm_index=1;c.arm_side='right';c.prefix='R.A1';c.label='右臂'
         c.status=Mock();c.idle=Mock();c.robot=Mock()
         c.robot.switch_to_drag_joint.return_value=0;c.robot.switch_to_position_mode.return_value=0
         c.robot.runtime_set_joint_pos_cmd.return_value=0

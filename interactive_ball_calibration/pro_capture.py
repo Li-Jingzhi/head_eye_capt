@@ -1,4 +1,4 @@
-"""Marvin Pro ARM1 drag teaching and reverse replay with50 unique stereo frames/point."""
+"""Marvin Pro left/right arm drag teaching and reverse replay with50 unique stereo frames/point."""
 import argparse
 import configparser
 from datetime import datetime
@@ -14,7 +14,6 @@ import numpy as np
 
 ROOT=Path(__file__).resolve().parents[1]
 VERSION='00040701'
-ARM_INDEX=1
 MAX_STEP_DEG=5.
 TEACH_STEP_DEG=3.
 FRAMES_PER_POINT=50
@@ -27,11 +26,13 @@ def checked(code,operation):
     if code!=0:raise RuntimeError(f'{operation} failed: {code}')
 
 
-def mdh_rows(path):
+def mdh_rows(path,arm_index=1):
+    if arm_index not in (0,1):raise ValueError('Arm index must be0or1')
+    prefix=f'R.A{arm_index}'
     config=configparser.ConfigParser();config.read(path)
     rows=np.asarray([[config.getfloat(section,key) for key in ('A','Alpha','D','Theta')]
-                     for section in [*(f'R.A1.L{i}.DH' for i in range(7)),'R.A1.FLANGE']])
-    if rows.shape!=(8,4) or not np.isfinite(rows).all():raise ValueError('Invalid R.A1 MDH')
+                     for section in [*(f'{prefix}.L{i}.DH' for i in range(7)),prefix+'.FLANGE']])
+    if rows.shape!=(8,4) or not np.isfinite(rows).all():raise ValueError(f'Invalid {prefix} MDH')
     return rows
 
 
@@ -135,15 +136,18 @@ def fuse(observations):
 class Capture:
     def __init__(self,args):
         self.args=args;self.stop=False;self.terminate=False
-        self.rows=mdh_rows(args.mdh)
+        self.arm_side=getattr(args,'arm','right');self.arm_index=0 if self.arm_side=='left' else 1
+        self.prefix=f'R.A{self.arm_index}';self.label='左臂' if self.arm_index==0 else '右臂'
+        self.rows=mdh_rows(args.mdh,self.arm_index)
         self.raw_hash=digest(ROOT/'configs/orin_pro_raw_fisheye_stereo_20261019.json')
         self.stereo_hash=digest(args.stereo);self.mdh_hash=digest(args.mdh)
         self.latest=ROOT/'runtime/yellow_detection/latest.json'
-        self.directory=ROOT/'data'/datetime.now().strftime('drag_replay_%Y%m%d_%H%M%S_%f')
+        session_prefix='left_drag_replay_' if self.arm_index==0 else 'drag_replay_'
+        self.directory=ROOT/'data'/datetime.now().strftime(session_prefix+'%Y%m%d_%H%M%S_%f')
         self.directory.mkdir(exist_ok=False)
         self.path=self.directory/'taught_trajectory.json';self.output=self.directory/'replay_capture.jsonl'
-        self.provenance=dict(robot_ip=args.robot_ip,arm_side='right',arm_index=1,sdk_version=VERSION,
-            mdh_source=str(Path(args.mdh).resolve())+':R.A1',mdh_sha256=self.mdh_hash,
+        self.provenance=dict(robot_ip=args.robot_ip,arm_side=self.arm_side,arm_index=self.arm_index,sdk_version=VERSION,
+            mdh_source=str(Path(args.mdh).resolve())+':'+self.prefix,mdh_sha256=self.mdh_hash,
             stereo_model_sha256=self.stereo_hash,source_calibration_sha256=self.raw_hash,
             image_size=[1280,992],sensor_ids=['left:csi://8','right:csi://0'],pixel_domain='ideal_pinhole')
         (self.directory/'session.json').write_text(json.dumps(self.provenance,indent=2))
@@ -176,19 +180,20 @@ class Capture:
     def connect(self):
         sys.path.insert(0,str(ROOT.parent/'00040701'))
         self.sdk=importlib.import_module('PYTHON_SDK.GentoRobot');self.robot=self.sdk.GentoRobot(precision=6)
-        self.robot.link(*map(int,self.args.robot_ip.split('.')),log_level=self.sdk.FXLogMask.FX_LOG_INFO_FLAG)
-        if not self.robot._connected:raise RuntimeError('Controller connection failed')
-        self.arm=self.sdk.FXObjType.OBJ_ARM1
+        link_code=self.robot.link(*map(int,self.args.robot_ip.split('.')),log_level=self.sdk.FXLogMask.FX_LOG_INFO_FLAG)
+        if not self.robot._connected:
+            raise RuntimeError(f'Controller connection failed: {link_code} ({self.robot._get_operate_error_msg(link_code)})')
+        self.arm=getattr(self.sdk.FXObjType,f'OBJ_ARM{self.arm_index}')
         if self.robot.get_sdk_version()!=VERSION or self.robot.get_controller_version()!=VERSION:
             raise RuntimeError('SDK/controller must both be00040701')
-        ret,dof=self.robot.param_get_int('R.A1.BASIC.Dof')
-        if ret!=0 or dof!=7:raise RuntimeError('ARM1 is not an enabled7-axis arm')
+        ret,dof=self.robot.param_get_int(self.prefix+'.BASIC.Dof')
+        if ret!=0 or dof!=7:raise RuntimeError(f'ARM{self.arm_index} is not an enabled7-axis arm')
         initial=self.robot.get_rt_dict().get('frame_serial')
         for _ in range(100):
             time.sleep(.01)
             if self.robot.get_rt_dict().get('frame_serial')!=initial:break
         else:raise RuntimeError('No fresh controller feedback after link')
-        for section,row in zip([*(f'R.A1.L{i}.DH' for i in range(7)),'R.A1.FLANGE'],self.rows):
+        for section,row in zip([*(f'{self.prefix}.L{i}.DH' for i in range(7)),self.prefix+'.FLANGE'],self.rows):
             for key,expected in zip(('A','Alpha','D','Theta'),row):
                 ret,value=self.robot.param_get_float(section+'.'+key)
                 if ret!=0 or not np.isfinite(value) or abs(value-expected)>.01:
@@ -197,15 +202,15 @@ class Capture:
         for i in range(7):
             pair=[]
             for name in ('LimitNeg','LimitPos'):
-                ret,value=self.robot.param_get_float(f'R.A1.L{i}.BASIC.{name}');checked(ret,'Read live limit')
+                ret,value=self.robot.param_get_float(f'{self.prefix}.L{i}.BASIC.{name}');checked(ret,'Read live limit')
                 if not np.isfinite(value):raise RuntimeError('Nonfinite live limit')
                 pair.append(value)
             if pair[0]>=pair[1]:raise RuntimeError('Invalid live joint limits')
             self.limits.append(pair)
         self.limits=np.asarray(self.limits)
-        if self.state()!='IDLE':raise RuntimeError('Right arm must already be IDLE; refusing to take over active/error state')
+        if self.state()!='IDLE':raise RuntimeError(f'{self.label} must already be IDLE; refusing to take over active/error state')
         check_q(self.feedback()[0],self.limits)
-        print('Connected192.168.12.190,00040701,ARM1;1004.ini R.A1 matches live MDH.',flush=True)
+        print(f'Connected{self.args.robot_ip},{VERSION},ARM{self.arm_index};{self.prefix} matches live MDH.',flush=True)
 
     def state(self):return self.sdk.state_map.get(self.robot.current_state(self.arm),'Unknown')
 
@@ -216,19 +221,19 @@ class Capture:
         serial=rt['frame_serial']
         if serial!=self.last_serial:self.last_serial=serial;self.last_feedback=time.monotonic()
         elif time.monotonic()-self.last_feedback>.3:raise RuntimeError('Robot feedback stopped updating')
-        fb=rt['arms'][ARM_INDEX]['fb'];q=np.asarray(fb['fb_pos'],float);v=np.asarray(fb['fb_vel'],float)
-        if q.shape!=(7,) or v.shape!=(7,) or not np.isfinite(np.r_[q,v]).all():raise RuntimeError('Invalid ARM1 feedback')
+        fb=rt['arms'][self.arm_index]['fb'];q=np.asarray(fb['fb_pos'],float);v=np.asarray(fb['fb_vel'],float)
+        if q.shape!=(7,) or v.shape!=(7,) or not np.isfinite(np.r_[q,v]).all():raise RuntimeError(f'Invalid ARM{self.arm_index} feedback')
         return q,v,serial
 
     def idle(self):
         if self.robot and self.robot._connected and self.owned:
-            checked(self.robot.switch_to_idle(self.arm,2000),'ARM1 IDLE');self.owned=False
+            checked(self.robot.switch_to_idle(self.arm,2000),f'ARM{self.arm_index} IDLE');self.owned=False
 
     def status(self,phase,**values):
         path=self.directory/'status.json';temp=path.with_suffix('.tmp')
         temp.write_text(json.dumps(dict(phase=phase,**values),indent=2));temp.replace(path)
         marker=ROOT/'runtime/drag_replay_session.json'
-        marker.write_text(json.dumps(dict(directory=str(self.directory),phase=phase,**values),indent=2))
+        marker.write_text(json.dumps(dict(directory=str(self.directory),arm_side=self.arm_side,arm_index=self.arm_index,phase=phase,**values),indent=2))
 
     def teach(self):
         waypoints=[]
@@ -238,12 +243,12 @@ class Capture:
             temp=path.with_suffix('.tmp');temp.write_text(json.dumps(value,indent=2,allow_nan=False));temp.replace(path)
         self.owned=True
         try:
-            checked(self.robot.switch_to_drag_joint(self.arm,2000,[3,3,3,2,1,1,1],[.2]*7),'ARM1 DragJoint')
+            checked(self.robot.switch_to_drag_joint(self.arm,2000,[3,3,3,2,1,1,1],[.2]*7),f'ARM{self.arm_index} DragJoint')
             self.status('teaching',points=0)
-            print('拖动示教已开始：仅右臂ARM1。按住拖动按钮，缓慢拖动；每3度记录一点。',flush=True)
+            print(f'拖动示教已开始：仅{self.label}ARM{self.arm_index}。按住拖动按钮，缓慢拖动；每3度记录一点。',flush=True)
             print('至少18点后，在本终端按Ctrl+C结束示教。保持相机固定、黄球可见；回放前需输入RUN。',flush=True)
             while not self.stop:
-                if self.state()!='DragJoint':raise RuntimeError('ARM1 left DragJoint')
+                if self.state()!='DragJoint':raise RuntimeError(f'ARM{self.arm_index} left DragJoint')
                 q,_,serial=self.feedback()
                 try:check_q(q,self.limits)
                 except ValueError as error:
@@ -264,7 +269,7 @@ class Capture:
             waypoints.append(dict(q7_deg=q.tolist(),robot_frame_serial=serial,
                                   local_monotonic_ns=time.monotonic_ns(),terminal_endpoint=True))
         save(False);validate_path(waypoints,self.limits);save(True)
-        print(f'示教完成：{len(waypoints)}点，右臂IDLE。轨迹：{self.path}',flush=True)
+        print(f'示教完成：{len(waypoints)}点，{self.label}IDLE。轨迹：{self.path}',flush=True)
         self.status('awaiting_RUN',points=len(waypoints))
         return waypoints
 
@@ -272,7 +277,7 @@ class Capture:
         deadline=time.monotonic()+35;stable=None
         while time.monotonic()<deadline:
             if self.stop:raise KeyboardInterrupt
-            if self.state()!='Position':raise RuntimeError('ARM1 left Position')
+            if self.state()!='Position':raise RuntimeError(f'ARM{self.arm_index} left Position')
             q,v,_=self.feedback()
             if np.max(abs(v))>30 or np.any(q<np.minimum(start,target)-2) or np.any(q>np.maximum(start,target)+2):
                 raise RuntimeError('Arm left taught joint segment / speed bound')
@@ -287,9 +292,9 @@ class Capture:
         observations=[];self.point_observations=observations;seen=[set(),set()];deadline=time.monotonic()+15;since=time.monotonic_ns();rejected=0
         while len(observations)<50 and time.monotonic()<deadline:
             if self.stop:raise KeyboardInterrupt
-            if self.state()!='Position':raise RuntimeError('ARM1 left Position during capture')
+            if self.state()!='Position':raise RuntimeError(f'ARM{self.arm_index} left Position during capture')
             q,v,serial=self.feedback()
-            if np.max(abs(q-target))>.3 or np.max(abs(v))>.5:raise RuntimeError('ARM1 moved during stationary camera capture')
+            if np.max(abs(q-target))>.3 or np.max(abs(v))>.5:raise RuntimeError(f'ARM{self.arm_index} moved during stationary camera capture')
             try:frame=self.camera()
             except (OSError,ValueError,KeyError):rejected+=1;time.sleep(.02);continue
             identity=frame['source_pts_ns']
@@ -302,13 +307,13 @@ class Capture:
 
     def replay(self,waypoints):
         validate_path(waypoints,self.limits)
-        if self.state()!='IDLE':raise RuntimeError('ARM1 must be IDLE before replay')
+        if self.state()!='IDLE':raise RuntimeError(f'ARM{self.arm_index} must be IDLE before replay')
         current,_,_=self.feedback()
         positioning=replay_position_waypoints(current,waypoints,self.limits)
         if self.stop:raise KeyboardInterrupt
         self.owned=True;valid_points=0;invalid_points=0
         try:
-            checked(self.robot.switch_to_position_mode(self.arm,2000,5,5),'ARM1 Position5%')
+            checked(self.robot.switch_to_position_mode(self.arm,2000,5,5),f'ARM{self.arm_index} Position5%')
             with self.output.open('x') as output:
                 for index,point in enumerate(positioning):
                     if self.stop:raise KeyboardInterrupt
@@ -359,6 +364,7 @@ class Capture:
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--arm',choices=('left','right'),default='right',help='left=ARM0/R.A0; right=ARM1/R.A1')
     parser.add_argument('--robot-ip',default='192.168.12.190')
     parser.add_argument('--mdh',default=str(ROOT/'configs/1004.ini'))
     parser.add_argument('--stereo',default=str(ROOT/'configs/orin_pro_rectified_stereo_20261019.json'))
@@ -370,7 +376,7 @@ def main():
     def stop(signum,frame):
         capture.stop=True
         if signum==signal.SIGTERM:capture.terminate=True
-        print('\nStop requested; finishing current write and returning ARM1 to IDLE.',flush=True)
+        print(f'\nStop requested; finishing current write and returning ARM{capture.arm_index} to IDLE.',flush=True)
     previous=signal.signal(signal.SIGINT,stop);previous_term=signal.signal(signal.SIGTERM,stop)
     try:
         capture.wait_camera();capture.connect()
@@ -392,7 +398,7 @@ def main():
         capture.status('awaiting_RUN',positioning_segments=len(positioning),endpoint_max_error_deg=maximum,
                        positioning_waypoints=positioning,taught_points=len(waypoints),taught_path=str(capture.path))
         print(f'先返回末点：{len(positioning)}段，最大关节总位移{maximum:.2f}度；每段≤5度，速度5%，不采集。确认运动范围无障碍物。',flush=True)
-        print('回放计划：原路逆序，速度/加速度5%，每停稳点融合50个唯一合格双目帧；不控制头部。',flush=True)
+        print(f'回放计划：仅{capture.arm_side}臂，原路逆序，速度/加速度5%，每停稳点融合50个唯一合格双目帧；不控制头部。',flush=True)
         if input('输入RUN开始回放；其他输入结束：').strip()!='RUN':return
         signal.signal(signal.SIGINT,stop)
         capture.wait_camera();capture.replay(waypoints)

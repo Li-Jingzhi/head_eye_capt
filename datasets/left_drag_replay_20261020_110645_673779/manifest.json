@@ -1,0 +1,48 @@
+{
+  "schema": "head_eye_pro_capture_archive_v1",
+  "capture_session": "left_drag_replay_20261020_110645_673779",
+  "arm_side": "left",
+  "arm_index": 0,
+  "mdh_chain": "R.A0",
+  "captured_points": 482,
+  "valid_points": 424,
+  "invalid_points": 58,
+  "recorded_stereo_observations": 24090,
+  "valid_position_observations": 21200,
+  "unique_source_frames_per_eye": [
+    24090,
+    24090
+  ],
+  "head_pose_recorded": false,
+  "files": [
+    {
+      "file": "replay_capture.jsonl.gz",
+      "compression": "gzip",
+      "uncompressed_bytes": 92684069,
+      "uncompressed_sha256": "f4bf745f2b0b2436fba9d9f1e8509faf6a57c7a923feaa4a74eae50019c2c26a",
+      "compressed_bytes": 11588865,
+      "compressed_sha256": "54e6aef486d8ab2685026294f727a29bb0f6507ff00d19b1e7f5ffbb5f9a0709"
+    },
+    {
+      "file": "taught_trajectory.json.gz",
+      "compression": "gzip",
+      "uncompressed_bytes": 123667,
+      "uncompressed_sha256": "fa3baa7632495b48b9af5b4a706a475c841b3258e25a884e4997ed9f43482529",
+      "compressed_bytes": 25651,
+      "compressed_sha256": "becc7d27f31e0054c8cbb9d064ac0930586fbc4cc1d7f13fd649ab169a9df120"
+    },
+    {
+      "file": "teach_replay.log.gz",
+      "compression": "gzip",
+      "uncompressed_bytes": 45104,
+      "uncompressed_sha256": "5b1f97ee528f79268fad6608c1651dfcc81eed03eae440357952464ba631382b",
+      "compressed_bytes": 6119,
+      "compressed_sha256": "38495f2e46ce52be02fff730f9442be0e9313c7142f839a7db8b5daba441ace6"
+    }
+  ],
+  "invalid_reason_counts": {
+    "Disparity jitter P95 exceeds0.1px": 57,
+    "Exactly50 unique valid frames required": 1
+  },
+  "notes": "All valid and invalid positions preserved. Source contains detection/ellipse/pixel/XYZ/joint/timestamp evidence, not raw images. No left-arm calibration performed in this data synchronization."
+}

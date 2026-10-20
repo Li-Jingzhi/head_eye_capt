@@ -112,3 +112,29 @@ bash scripts/teach_replay_ball.sh replay data/drag_replay_20261019_190707_834711
 ## 2026-10-20第二批回放数据
 
 `datasets/drag_replay_20261020_091535_901340/`保存360点回放的完整无损记录：288点有效、72点无效，拒绝原因与逐帧证据均保留。用于拟合时必须剔除`capture_valid=false`记录。本次同步未重新拟合标定参数，已发布模型仍对应上一批142点数据。
+
+## 左臂拖动示教与回放
+
+左臂使用ARM0、1004.ini的R.A0链；默认右臂入口行为保留。先将黄球固定左臂末端并确认双眼可见。
+
+```bash
+bash scripts/teach_replay_left.sh teach --check
+bash scripts/teach_replay_left.sh teach
+# 或回放已完成的左臂轨迹
+bash scripts/teach_replay_left.sh replay data/left_drag_replay_时间/taught_trajectory.json
+```
+
+按住左臂拖动按钮缓慢拖动，每3度记录一点；至少18点后Ctrl+C结束，随后RUN启动5%速度逆序回放，每点50个唯一合格双目帧。仅对ARM0发送模式/位置命令，使用ARM0反馈、限位和MDH；左臂数据保存为`data/left_drag_replay_...`，轨迹侧别校验拒绝右臂轨迹。保持相机固定，不采头姿，时间/抖动/关节稳定门槛与右臂相同。
+
+需要日志时，让日志接收端忽略SIGINT，以免Ctrl+C同时终止tee导致BrokenPipe：
+
+```bash
+set -o pipefail
+bash scripts/teach_replay_left.sh teach 2>&1 | (trap '' INT; exec tee runtime/left_teach_replay.log)
+```
+
+当前`pro_fit`仍专用于右臂数据，左臂标定不能直接套用右臂的模型或拟合入口。
+
+## 已完成的左臂482点数据
+
+`datasets/left_drag_replay_20261020_110645_673779/`包含左臂ARM0/R.A0的完整示教及回放归档：482点，424有效、58无效。有效和无效记录、逐帧证据、完整轨迹、日志及SHA256均保留，统计见目录内清单。本次未拟合左臂模型，右臂标定参数不能直接复用。
