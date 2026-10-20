@@ -1,0 +1,9 @@
+{
+  "right_anchor_sha256": "a229f06bad4365fa8576206d32dbaefa51a0fa8dd07fd28df870e52de3e616b2",
+  "left_registration_sha256": "d5968d821cb9018f1081574de175802bd81ab1c8769e39c74f6cb6cfafc344d8",
+  "alignment_sha256": "147e160154000a944b840a01b2335f14d88dbdc088440a2e257e8b3386b0e2c1",
+  "left_capture_sha256": "f4bf745f2b0b2436fba9d9f1e8509faf6a57c7a923feaa4a74eae50019c2c26a",
+  "reference_frame": "right_arm_mdh_parent",
+  "right_anchor_fixed": true,
+  "note": "No independently measured inter-arm transform; coordinate alignment is conditioned on the fixed right registration."
+}

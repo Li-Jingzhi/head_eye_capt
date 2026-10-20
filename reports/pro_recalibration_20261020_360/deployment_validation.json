@@ -1,0 +1,13 @@
+{
+  "bundle_id": "c56dab80ae6214beaf9d61099ccfd1e6ee311d76e70dd5d9a156658b51ff8022",
+  "available_arms": [
+    "right"
+  ],
+  "archived_valid_observations_reproduced": 14400,
+  "max_camera_coordinate_difference_m": 1.4432899320127035e-15,
+  "fused_flange_error_rms_mm": 0.8169861285716545,
+  "fused_flange_error_p95_mm": 1.5692613945365161,
+  "direct_solver_vs_packaged_flange_error_max_difference_mm": 5.43484139248207e-07,
+  "source_script_sha256": "ec0f8af3b8b01f4e8184b63f032d415ed39d121120c32c9b6d159f0ee4d9cf90",
+  "note": "Archived training positions only, no hardware or independent absolute ground truth. Existing default wheel unchanged."
+}

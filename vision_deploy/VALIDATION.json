@@ -1,0 +1,43 @@
+{
+  "package_version": "2.2.0",
+  "bundle_id": "0bc68f1f2e46cd21c3eb26618400901cf00e17fedbe2039d8753d974d12e4523",
+  "available_arms": [
+    "right",
+    "left"
+  ],
+  "commercial_model": "M6S-CCS-696",
+  "mdh_sha256": "c8d0634e66a697a19fbbb1c15f177106ad13764907ad934ff6138138183918bc",
+  "target_xyz_mm": {
+    "right": [
+      439.2625557212055,
+      -118.78806969658855,
+      -109.42676012036563
+    ],
+    "left": [
+      438.27968920477656,
+      122.55844738466064,
+      60.17997908142855
+    ]
+  },
+  "wheel_installed_outside_repo": true,
+  "packaged_markdown_documents": [
+    "robot_model.md",
+    "camera_connection.md",
+    "vendor_camera_driver_readme.md"
+  ],
+  "wheel": "stereo_robot_vision-2.2.0-py3-none-any.whl",
+  "wheel_sha256": "ff7a9a10eb7b18aeb957700637dbc4cb1dafcec80ba1ea14e57bd332c07b6f45",
+  "software_tests_passed": 22,
+  "archived_corrected_point_observations_reproduced": {
+    "right": 14400,
+    "left": 21200
+  },
+  "repository_full_suite": {
+    "tests_run": 63,
+    "failures": 1,
+    "errors": 15,
+    "note": "Historical camera/config files missing; rectified baseline near-zero terms fail overly strict relative tolerance. Full repository suite is not green."
+  },
+  "hardware_connection_tested": false,
+  "note": "Right anchor unchanged; interarm mapping camera-derived. Model name user-confirmed. No new calibration or independent absolute accuracy validation."
+}

@@ -8,4 +8,4 @@
 - `session.json`、`status.json`：设备、MDH与标定身份和完成状态。
 - `manifest.json`：统计、拒绝原因及压缩前后SHA256。
 
-通过`gzip -dk 文件名.gz`解压。本数据使用左臂ARM0、1004.ini:R.A0，不采头姿。采集入口为`bash scripts/teach_replay_left.sh teach`，历史轨迹复用需现场核对。当前`pro_fit`仅接受右臂数据，不能直接用于本数据或套用右臂标定模型。本次仅同步数据，未生成左臂标定。
+通过`gzip -dk 文件名.gz`解压。本数据使用左臂ARM0、1004.ini:R.A0，不采头姿。采集入口为`bash scripts/teach_replay_left.sh teach`，历史轨迹复用需现场核对。数据入库时未标定；后续已增加`pro_fit --arm left`并完成424点左臂标定与固定右臂参考对齐，见`../../reports/pro_left_registration_20261020_482/report.md`。不能把左臂数据套用右臂链或直接复用右臂原生外参。

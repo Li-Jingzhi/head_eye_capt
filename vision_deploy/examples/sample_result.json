@@ -1,0 +1,28 @@
+{
+  "xyz": [
+    439.2625557212055,
+    -118.78806969658855,
+    -109.42676012036563
+  ],
+  "units": "mm",
+  "arm": "right",
+  "frame": "right_arm_mdh_parent",
+  "camera_xyz_m": [
+    0.05335464803445142,
+    0.09181843313996718,
+    0.4403718144746972
+  ],
+  "rectified_pixels": [
+    710.0,
+    569.0,
+    764.0,
+    569.0
+  ],
+  "reprojection_error_px": 0.0,
+  "within_calibration_volume": true,
+  "base_frame_verified": false,
+  "independently_verified": false,
+  "bundle_id": "0bc68f1f2e46cd21c3eb26618400901cf00e17fedbe2039d8753d974d12e4523",
+  "id": "example-target",
+  "ok": true
+}

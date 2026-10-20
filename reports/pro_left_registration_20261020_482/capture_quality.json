@@ -1,0 +1,181 @@
+{
+  "captured_positions": 482,
+  "valid_positions": 424,
+  "rejected_positions": 58,
+  "all_recorded_stereo_frames": 24090,
+  "valid_stereo_frames": 21200,
+  "unique_source_frames_per_eye": [
+    24090,
+    24090
+  ],
+  "rejected_frame_count": 2890,
+  "invalid_reason_counts": {
+    "Disparity jitter P95 exceeds0.1px": 57,
+    "Exactly50 unique valid frames required": 1
+  },
+  "diagnostics": {
+    "frame_count": 21200,
+    "window_jitter_p95_mm": {
+      "median": 0.36452663561299337,
+      "p95": 0.644923886633232,
+      "max": 1.1631988260848607
+    },
+    "first_last_half_median_shift_mm": {
+      "median": 0.037102660279802274,
+      "p95": 0.14915546868344093,
+      "max": 0.3197965989168465
+    },
+    "source_skew_ms": {
+      "median": 8.516408,
+      "p95": 9.57280005,
+      "max": 9.999741
+    },
+    "arrival_skew_ms": {
+      "median": 4.968891,
+      "p95": 9.2066698,
+      "max": 9.998719
+    },
+    "epipolar_abs_px": {
+      "median": 0.08414857513571405,
+      "p95": 0.24029281289710405,
+      "max": 0.498830456622386
+    },
+    "joint_window_max_span_deg": 0.000762999999999181,
+    "correlations": {
+      "camera_x_m": {
+        "error_norm": -0.1652190853474119,
+        "signed_z": 0.01794161642512373
+      },
+      "camera_y_m": {
+        "error_norm": 0.162514164272458,
+        "signed_z": -0.07130090478911257
+      },
+      "camera_z_m": {
+        "error_norm": 0.28350171055011125,
+        "signed_z": -0.055900142814107476
+      },
+      "window_jitter_p95_mm": {
+        "error_norm": 0.23624321598751513,
+        "signed_z": -0.06685614339294176
+      },
+      "first_last_half_median_shift_mm": {
+        "error_norm": 0.060985516061096645,
+        "signed_z": -0.0017297561333119468
+      },
+      "source_skew_ms": {
+        "error_norm": 0.14636865004185845,
+        "signed_z": 0.0018823202304009475
+      },
+      "epipolar_abs_px": {
+        "error_norm": 0.1375590742925733,
+        "signed_z": 0.11257580728939949
+      },
+      "joint_1_deg": {
+        "error_norm": -0.24101768887596337,
+        "signed_z": 0.002290206022965225
+      },
+      "joint_2_deg": {
+        "error_norm": -0.20664909787143265,
+        "signed_z": 0.13933962922662185
+      },
+      "joint_3_deg": {
+        "error_norm": 0.15682664303178082,
+        "signed_z": 0.03341074932388858
+      },
+      "joint_4_deg": {
+        "error_norm": 0.3624124812378934,
+        "signed_z": -0.12106655220983253
+      },
+      "joint_5_deg": {
+        "error_norm": -0.16267817852397531,
+        "signed_z": 0.0015814476464655843
+      },
+      "joint_6_deg": {
+        "error_norm": 0.023892745191245443,
+        "signed_z": 0.13108536192156664
+      },
+      "joint_7_deg": {
+        "error_norm": 0.15709160576618278,
+        "signed_z": -0.0008709898145075914
+      }
+    },
+    "depth_bins": [
+      {
+        "z_range_m": [
+          0.23881636923674288,
+          0.39634441578377655
+        ],
+        "metrics": {
+          "samples": 142,
+          "mean_mm": 0.5770452393680786,
+          "rms_mm": 0.6520072171724923,
+          "median_mm": 0.5091620844374569,
+          "p95_mm": 1.0854345242680836,
+          "max_mm": 1.978155657349132,
+          "axis_bias_mm": [
+            0.0035145112087108595,
+            0.018447174818850057,
+            -0.022149612413256907
+          ],
+          "axis_rms_mm": [
+            0.24774472035121514,
+            0.2973887574988704,
+            0.5246864699002574
+          ],
+          "fraction_within_1mm": 0.9225352112676056
+        }
+      },
+      {
+        "z_range_m": [
+          0.397836815144591,
+          0.45508479726888434
+        ],
+        "metrics": {
+          "samples": 141,
+          "mean_mm": 0.7100241578900668,
+          "rms_mm": 0.8169520393028075,
+          "median_mm": 0.5973267207081229,
+          "p95_mm": 1.5735667045031199,
+          "max_mm": 1.9108124082142737,
+          "axis_bias_mm": [
+            -0.031530178797485764,
+            -0.0015108377970087666,
+            -0.0939304921034157
+          ],
+          "axis_rms_mm": [
+            0.2339193536056312,
+            0.3289995163812985,
+            0.7102476249524603
+          ],
+          "fraction_within_1mm": 0.7801418439716312
+        }
+      },
+      {
+        "z_range_m": [
+          0.45520676429899,
+          0.5615624334568388
+        ],
+        "metrics": {
+          "samples": 141,
+          "mean_mm": 0.8798293900238888,
+          "rms_mm": 1.011629636087447,
+          "median_mm": 0.7858779074527807,
+          "p95_mm": 1.7494892248763458,
+          "max_mm": 3.431279982827132,
+          "axis_bias_mm": [
+            0.030133587293320756,
+            0.1039206987501489,
+            -0.06977135354571339
+          ],
+          "axis_rms_mm": [
+            0.24388160824436908,
+            0.3490711477161083,
+            0.917641332767176
+          ],
+          "fraction_within_1mm": 0.6950354609929078
+        }
+      }
+    ],
+    "note": "Correlations are descriptive, confounded by trajectory; they do not identify causal error sources."
+  }
+}

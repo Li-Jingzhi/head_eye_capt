@@ -1,0 +1,10 @@
+{
+  "schema": "stereo_robot_bundle_v1",
+  "sha256": {
+    "arms.json": "5029e67758c3c091de88176c52b84cb76c43f18b23d6b4e412a78df32acf8ed8",
+    "raw_fisheye.json": "65114bda1bc22c954af538e1a710ccd1ec4fb26f2f24f8f9f6da01516d1a80be",
+    "rectified_stereo.json": "aeb16f4fa40c1be996475bdcb3fd7a602f4fe1fcfb26711348c86071f2153a09",
+    "robot_geometry.ini": "c8d0634e66a697a19fbbb1c15f177106ad13764907ad934ff6138138183918bc"
+  },
+  "camera_transfer_condition": "Same physical stereo rig and unchanged camera-to-arm mounting; new hardware/mount requires recalibration."
+}

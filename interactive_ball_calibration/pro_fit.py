@@ -15,7 +15,9 @@ def read_capture(path):
     return gzip.decompress(data) if str(path).endswith('.gz') else data
 
 
-def load_capture(path,stereo,mdh,raw):
+def load_capture(path,stereo,mdh,raw,*,arm='right'):
+    if arm not in ('left','right'):raise ValueError('arm must be left or right')
+    arm_index=0 if arm=='left' else 1
     model=json.loads(Path(stereo).read_text());raw_hash=digest(raw);stereo_hash=digest(stereo);mdh_hash=digest(mdh)
     if model.get('schema')!='head_eye_pro_rectified_stereo_v1' or model.get('source_calibration_sha256')!=raw_hash:
         raise ValueError('Wrong Pro stereo/raw contract')
@@ -24,11 +26,11 @@ def load_capture(path,stereo,mdh,raw):
     if len(rows)<30:raise ValueError('Need at least30 valid positions for blocked validation')
     if len({r['waypoint_index'] for r in rows})!=len(rows):raise ValueError('Repeated waypoint')
     expected=dict(mdh_sha256=mdh_hash,stereo_model_sha256=stereo_hash,source_calibration_sha256=raw_hash,
-        sdk_version='00040701',arm_index=1,arm_side='right',robot_ip='192.168.12.190',
+        sdk_version='00040701',arm_index=arm_index,arm_side=arm,robot_ip='192.168.12.190',
         image_size=model['image_size'],sensor_ids=model['sensor_ids'],pixel_domain=model['pixel_domain'],
         capture_kind='interactive_ball_auto',valid_frames=50,yellow_ball_diameter_m=.04,
         sphere_center_method='sphere_center_projection_stereo_v1')
-    chain=mdh_rows(mdh);seen=[set(),set()]
+    chain=mdh_rows(mdh,arm_index);seen=[set(),set()]
     for row in rows:
         if any(row.get(key)!=value for key,value in expected.items()):raise ValueError('Capture contract mismatch')
         frames=row['camera_window_frames']
@@ -68,8 +70,8 @@ def blocked_splits(count):
         yield train,held
 
 
-def fit(path,stereo,mdh,raw):
-    rows,rejected=load_capture(path,stereo,mdh,raw);chain=mdh_rows(mdh)
+def fit(path,stereo,mdh,raw,*,arm='right'):
+    rows,rejected=load_capture(path,stereo,mdh,raw,arm=arm);chain=mdh_rows(mdh,0 if arm=='left' else 1)
     poses=np.array([flange_pose(r['q7_deg'],chain) for r in rows]);points=np.array([r['sphere_center_left_camera_m'] for r in rows])
     cv=np.empty_like(points);fold_ids=np.empty(len(rows),int);folds=[]
     for index,(train,held) in enumerate(blocked_splits(len(rows))):
@@ -83,7 +85,8 @@ def fit(path,stereo,mdh,raw):
     fitted=predict(poses,offset,R,t);fit_stats=metrics(fitted-points);cv_stats=metrics(cv-points)
     T=np.eye(4);T[:3,:3]=R;T[:3,3]=t;inverse=np.eye(4);inverse[:3,:3]=R.T;inverse[:3,3]=-R.T@t
     result=dict(schema='head_eye_pro_fixed_camera_registration_v1',units='m',
-        frame_definition='left_camera_from_right_arm_MDH_parent',flange_to_ball_center_m=offset.tolist(),
+        frame_definition=f'left_camera_from_{arm}_arm_MDH_parent',arm_side=arm,arm_index=0 if arm=='left' else 1,
+        flange_to_ball_center_m=offset.tolist(),
         left_camera_from_arm_mdh_R=R.tolist(),left_camera_from_arm_mdh_t_m=t.tolist(),
         left_camera_from_arm_mdh_T=T.tolist(),arm_mdh_from_left_camera_T=inverse.tolist(),
         mdh_sha256=digest(mdh),stereo_model_sha256=digest(stereo),source_calibration_sha256=digest(raw),
@@ -94,6 +97,7 @@ def fit(path,stereo,mdh,raw):
         validation_method='5 contiguous trajectory blocks; purge2 neighbouring positions each side; no residual-based exclusion',
         internal_consistency_1mm_p95_passed=cv_stats['p95_mm']<=1.,independently_verified=False,
         camera_xyz_span_m=np.ptp(points,axis=0).tolist(),joint_span_deg=np.ptp([r['q7_deg'] for r in rows],axis=0).tolist(),
+        camera_xyz_bounds_m=dict(min=points.min(0).tolist(),max=points.max(0).tolist()),
         warnings=['Single-session internal consistency, not external absolute accuracy.',
                   '40mm ball diameter assumed; hardware exposure synchronization unverified.',
                   'MDH parent not independently verified as whole-robot base.'])
@@ -105,10 +109,11 @@ def fit(path,stereo,mdh,raw):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--capture',required=True)
+    parser.add_argument('--arm',choices=('left','right'),default='right')
     parser.add_argument('--stereo',default=str(ROOT/'configs/orin_pro_rectified_stereo_20261019.json'))
     parser.add_argument('--raw',default=str(ROOT/'configs/orin_pro_raw_fisheye_stereo_20261019.json'))
     parser.add_argument('--mdh',default=str(ROOT/'configs/1004.ini'));parser.add_argument('--output',required=True)
-    args=parser.parse_args();result,errors=fit(args.capture,args.stereo,args.mdh,args.raw)
+    args=parser.parse_args();result,errors=fit(args.capture,args.stereo,args.mdh,args.raw,arm=args.arm)
     output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
     with output.open('x') as f:json.dump(result,f,indent=2,allow_nan=False);f.write('\n')
     with output.with_suffix('.csv').open('x',newline='') as f:
