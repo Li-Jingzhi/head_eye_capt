@@ -1,0 +1,48 @@
+{
+  "pair_source_clock_skew_ms": {
+    "median": 5.626812,
+    "abs_p95": 9.098833649999996,
+    "abs_max": 9.974954
+  },
+  "pair_dequeue_skew_ms": {
+    "median": 4.743997,
+    "abs_p95": 8.27917795,
+    "abs_max": 9.997251
+  },
+  "epipolar_dv_px": {
+    "median": -0.030575912782154546,
+    "abs_p95": 0.17701957356438805,
+    "abs_max": 0.26574743082306895
+  },
+  "stereo_reprojection_px": {
+    "median": 0.028167202677574436,
+    "abs_p95": 0.08851089688733804,
+    "abs_max": 0.1328755876131469
+  },
+  "sphere_center_p95_jitter_mm": {
+    "median": 0.2287350081823678,
+    "p95": 0.5654723783328646,
+    "max": 1.053067060804375
+  },
+  "sphere_corrected_disparity_jitter_p95_px": {
+    "median": 0.0345794696589138,
+    "p95": 0.05741791133989488,
+    "max": 0.09356657621742101
+  },
+  "disparity_jitter_p95_px": {
+    "median": 0.03481755256652831,
+    "p95": 0.05776366233825678,
+    "max": 0.09422025680541993
+  },
+  "max_robot_window_span_deg": 0.000671999999980244,
+  "head_pose_fields_present": false,
+  "frames": 7100,
+  "unique_source_frames_per_eye": [
+    7100,
+    7100
+  ],
+  "depth_range_m": [
+    0.3006628296475321,
+    0.5311867095470779
+  ]
+}

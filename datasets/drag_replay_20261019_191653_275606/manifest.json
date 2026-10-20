@@ -1,0 +1,26 @@
+{
+  "schema": "head_eye_pro_capture_archive_v1",
+  "captured_points": 142,
+  "valid_points": 142,
+  "unique_stereo_observations": 7100,
+  "head_pose_recorded": false,
+  "files": [
+    {
+      "file": "replay_capture.jsonl.gz",
+      "compression": "gzip",
+      "uncompressed_bytes": 27484194,
+      "uncompressed_sha256": "38f378dbe1e6a26e5a82299b41333d3d7244b3465d7f9950257add2a16a47598",
+      "compressed_sha256": "3f8b499cf4743175613bfffeb01ab0dfb2d5cc978ed1d88b600282f1c98946b2",
+      "compressed_bytes": 3451745
+    },
+    {
+      "file": "taught_trajectory.partial.json.gz",
+      "compression": "gzip",
+      "uncompressed_bytes": 36961,
+      "uncompressed_sha256": "aff5ada17fe189a7395887d7472e1b6e850ecca61bbbbe58addd4dfd1576127e",
+      "compressed_sha256": "e53c39660d10573b2301609238ec3260f4c30f8dfaff1a5600614bf9c781e608",
+      "compressed_bytes": 8179
+    }
+  ],
+  "notes": "Original teaching stopped at joint safety margin; saved142point prefix was validated and replayed. No image pixels captured in this session; JSONL includes detection/ellipse/pixel/XYZ/joint/timestamp evidence."
+}
