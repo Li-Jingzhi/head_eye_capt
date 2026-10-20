@@ -1,0 +1,7 @@
+{
+  "phase": "completed_with_invalid_points",
+  "points": 360,
+  "valid_points": 288,
+  "invalid_points": 72,
+  "output": "/home/lijingzhi/Project/Learned_IK/head_eye_pro/data/drag_replay_20261020_091535_901340/replay_capture.jsonl"
+}

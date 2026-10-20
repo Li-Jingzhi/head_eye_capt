@@ -108,3 +108,7 @@ bash scripts/teach_replay_ball.sh replay data/drag_replay_20261019_190707_834711
 回放142个位置全部有效，每点50帧，共7100个唯一双目观测。完整无损压缩数据、来源轨迹与SHA256清单在`datasets/drag_replay_20261019_191653_275606/`，没有原始图像。当前Pro无头姿拟合入口是`interactive_ball_calibration.pro_fit`；已生成`configs/orin_pro_ball_registration_20261019.json`及逐点误差CSV。
 
 三维误差：拟合RMS0.857mm/P951.515mm；连续轨迹分段5折留出RMS1.187mm/P952.112mm，尚未通过P95≤1mm要求。单次会话内部一致性不代表独立绝对精度。完整验证方法、采集质量和复现命令见`reports/pro_registration_20261019/report.md`。
+
+## 2026-10-20第二批回放数据
+
+`datasets/drag_replay_20261020_091535_901340/`保存360点回放的完整无损记录：288点有效、72点无效，拒绝原因与逐帧证据均保留。用于拟合时必须剔除`capture_valid=false`记录。本次同步未重新拟合标定参数，已发布模型仍对应上一批142点数据。
