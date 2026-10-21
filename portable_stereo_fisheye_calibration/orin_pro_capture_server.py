@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Raw full resolution CSI capture, with locked imaging and SSH-only HTTP access."""
+import argparse
 import io
 import json
 import threading
@@ -16,6 +17,8 @@ from gi.repository import Gst
 
 Gst.init(None)
 frames = [None, None]
+sensors = [8, 0]
+eye_names = ['left', 'right']
 mutex = threading.Lock()
 pipelines = []
 cameras = []
@@ -42,7 +45,7 @@ def receive(sink, eye):
 
 
 def state():
-    return dict(locked=locked, error=failure, sensors=[8, 0], image_size=[2560, 1984],
+    return dict(locked=locked, error=failure, sensors=sensors, image_size=[2560, 1984],
                 controls=[dict(aelock=bool(c.get_property('aelock')),
                                awblock=bool(c.get_property('awblock')),
                                aeantibanding=int(c.get_property('aeantibanding'))) for c in cameras],
@@ -77,7 +80,7 @@ class Handler(BaseHTTPRequestHandler):
             view = np.hstack([cv2.resize(f[0], (640, 496)) for f in pair])
             self.reply(200, cv2.imencode('.jpg', view, [cv2.IMWRITE_JPEG_QUALITY, 85])[1].tobytes(), 'image/jpeg')
             return
-        skew = abs(pair[0][2]-pair[1][2])/1e6
+        skew = (max(f[2] for f in pair)-min(f[2] for f in pair))/1e6
         if not locked or skew > 20:
             self.reply(409, json.dumps(dict(error='controls unlocked or dequeue skew >20ms', skew_ms=skew)).encode())
             return
@@ -87,7 +90,7 @@ class Handler(BaseHTTPRequestHandler):
         metadata['dequeue_ns'] = [f[2] for f in pair]
         data = io.BytesIO()
         with zipfile.ZipFile(data, 'w', compression=zipfile.ZIP_STORED) as archive:
-            for eye, f in zip(('left', 'right'), pair):
+            for eye, f in zip(eye_names, pair):
                 ok, png = cv2.imencode('.png', f[0])
                 if not ok:
                     raise RuntimeError('PNG encoding failed')
@@ -116,7 +119,15 @@ def monitor():
 
 
 if __name__ == '__main__':
-    for eye, sensor in enumerate((8, 0)):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--sensor', type=int, choices=range(10), help='single camera; omitted keeps stereo CSI8/0')
+    parser.add_argument('--port', type=int, default=8766)
+    args = parser.parse_args()
+    if args.sensor is not None:
+        sensors = [args.sensor]
+        eye_names = ['mono']
+        frames = [None]
+    for eye, sensor in enumerate(sensors):
         p = Gst.parse_launch(
             f'nvarguscamerasrc name=cam sensor-id={sensor} sensor-mode=0 aeantibanding=2 aelock=false awblock=false ! '
             'video/x-raw(memory:NVMM),width=2560,height=1984,format=NV12,framerate=30/1 ! '
@@ -129,7 +140,7 @@ if __name__ == '__main__':
         p.set_state(Gst.State.PLAYING)
     threading.Thread(target=monitor, daemon=True).start()
     try:
-        ThreadingHTTPServer(('127.0.0.1', 8766), Handler).serve_forever()
+        ThreadingHTTPServer(('127.0.0.1', args.port), Handler).serve_forever()
     finally:
         for p in pipelines:
             p.set_state(Gst.State.NULL)

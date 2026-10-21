@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Display Orin rectified stereo previews, with optional epipolar guide lines."""
 import json
-import os
 import socket
 from pathlib import Path
 import threading
@@ -14,7 +13,7 @@ def upright_point(point):
     return tuple(int(round(limit-((value+.5)*.5-.5))) for value,limit in zip(point,(639,495)))
 
 
-def main():
+def main(overlay=None,should_stop=None):
     frames=[None,None];counts=[0,0];stamps=[0.,0.];running=True
     latest=[None,0.]
     last_valid=[None,0.]
@@ -48,9 +47,10 @@ def main():
         capture.release()
     for eye,port in enumerate((5120,5122)):threading.Thread(target=receive,args=(eye,port),daemon=True).start()
     name='head_eye_pro YELLOW DETECTION - LEFT CSI8 | RIGHT CSI0 - G grid - Q close'
-    cv2.namedWindow(name,cv2.WINDOW_NORMAL);cv2.resizeWindow(name,1280,530)
-    grid=False;last=0
-    while True:
+    if overlay is not None:name='LEFT ARM0 - vision_deploy ball XYZ vs FK - Q closes / IDLE'
+    cv2.namedWindow(name,cv2.WINDOW_NORMAL);cv2.resizeWindow(name,1280,650 if overlay is not None else 530)
+    grid=False;last=0;comparison=None
+    while should_stop is None or not should_stop():
         tiles=[]
         record=latest[0] if time.monotonic()-latest[1]<1 else None
         for eye,label in enumerate(('LEFT CSI8','RIGHT CSI0')):
@@ -81,15 +81,21 @@ def main():
         view=np.hstack(tiles)
         if grid:
             for y in range(50,496,50):cv2.line(view,(0,y),(1279,y),(0,255,0),1)
+        if overlay is not None:
+            comparison=overlay(last_valid[0])
+            panel=np.zeros((150,1280,3),np.uint8)
+            for index,line in enumerate(comparison.get('lines',[])):
+                cv2.putText(panel,line,(15,25+27*index),cv2.FONT_HERSHEY_SIMPLEX,.58,(0,255,255),1)
+            view=np.vstack([view,panel])
         cv2.imshow(name,view)
         if time.monotonic()-last>2:
-            (root/'status.json').write_text(json.dumps(dict(frames=counts,age_s=[time.monotonic()-s for s in stamps],detection=record)))
+            (root/'status.json').write_text(json.dumps(dict(frames=counts,age_s=[time.monotonic()-s for s in stamps],detection=record,comparison=comparison)))
             cv2.imwrite(str(root/'stereo.jpg'),view)
             last=time.monotonic()
         key=cv2.waitKey(25)&255
         if key==ord('g'):grid=not grid
         if key in (27,ord('q')) or cv2.getWindowProperty(name,cv2.WND_PROP_VISIBLE)<1:break
-    running=False;udp.close();cv2.destroyAllWindows();os._exit(0)
+    running=False;udp.close();cv2.destroyAllWindows()
 
 
 if __name__=='__main__':main()

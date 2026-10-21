@@ -1,5 +1,11 @@
 # head_eye_pro
 
+历史刚体标定流程见：[双目与双臂标定流程](docs/双目与双臂标定流程_20261020.md)，包含实际命令、坐标/pF定义、当前误差结果、部署和实时对比。
+
+新增单目CSI6（`/dev/video6`）自动棋盘采集与独立鱼眼标定，见[CSI6单目标定流程](docs/CSI6单目鱼眼标定流程.md)。
+2026-10-21已完成40张标定，原分辨率重投影RMS0.10494px/P950.19160px，见[单目标定结果](reports/mono_csi6_20261021/report.md)。
+
+
 ## 当前部署：共享pF联合补偿 v3.0.0
 
 `vision_deploy`采用严格共享pF＋各臂仿射映射＋共用高斯补偿，候选`affine_l60_a3`。共享pF=[0.805172207,0.250867485,100.581847535]mm；右/左臂分块留出RMS为0.887/0.841mm、P95为1.611/1.484mm。两臂映射均已联合重估，不再固定旧右臂外参。完整[机理和验证](reports/shared_pf_joint_kernel_20261021/report.md)、[独立迁移与调用说明](vision_deploy/README.md)。wheel和完整ZIP包含全部参数、完整MDH及相机教程，运行只依赖NumPy/OpenCV。
@@ -172,3 +178,27 @@ bash scripts/teach_replay_left.sh teach 2>&1 | (trap '' INT; exec tee runtime/le
 进一步的[18组合共享pF与观测补偿实验](reports/shared_camera_affine_refinement_20261020/report.md)：比较视差、径向及空间多项式补偿。最佳实验候选严格共享pF，右/左臂留出RMS为0.876/0.843mm、P95为1.610/1.577mm；尚未达到双臂P95≤1mm。报告包含完整参数、实验调用示例和逐点验证记录，当时未替换部署参数。
 
 最新[共享pF的Rt退化诊断与联合高斯补偿改进](reports/shared_pf_joint_kernel_20261021/report.md)：量化pF与姿态/外参耦合，联合拟合严格共享pF、各臂仿射映射与共用平滑场。固定候选右/左RMS为0.887/0.841mm、P95为1.611/1.484mm；固定候选和嵌套选型流程均达到原独立pF＋Rt的六项指标。包含完整参数、调用示例及17088条逐点复核；该实验仍非纯Rt模型，尚缺独立实物验收。
+
+## 左臂黄球实时视觉/FK对比
+
+推荐直接运行一键Python入口（可在任意目录执行）：
+
+```bash
+/usr/bin/python3 /home/lijingzhi/Project/Learned_IK/head_eye_pro/start_left_live_compare.py
+```
+
+脚本复用正常实时采样；数据过期时调用现有Orin启动器准备双目并提示SSH密码（也可使用`ORIN_PRO_PASSWORD`环境变量），随后完成左臂IDLE、MDH及单帧质量预检，进入ARM0拖动并显示视觉/FK坐标和误差。重复启动不接管第二次；只识别真正的Python模块进程，不把旧终端命令当成活动窗口。关闭窗口后可重新运行。参数哈希匹配的Orin采集进程会直接复用，不因本机窗口关闭而重启相机。Q/Esc或Ctrl+C退出并尝试IDLE。相机/机器人连接和拖动前提仍需满足；脚本不会清除控制器故障或停止未知控制客户端。
+
+原模块入口仍可使用：
+
+```bash
+/usr/bin/python3 -m interactive_ball_calibration.live_left_compare
+```
+
+黄球固定在左臂，保持双眼可见；相机严格预检、ARM0 IDLE及MDH匹配通过后进入左臂DragJoint。窗口显示左臂MDH父坐标系下的视觉XYZ、FK球心XYZ、差值Vision−FK及三维距离（mm）。视觉调用原样`vision_deploy`的`StereoRobot.predict(corrected_pixels, arm='left', units='mm')`；输入是上游已修正球心像素，FK使用部署包中当前部署包中的左pF（v3.0.0为共享偏置 `[0.805172,0.250867,100.581848]mm`）。
+
+SDK反馈按本机视觉报文接收时刻选最近关节样本（最多50ms差），相机/关节过期时隐藏坐标和误差；这是报文接收时间对齐，不是硬件曝光同步。运动时偏差包含时延影响，应停稳后判断静态误差。Q/Esc关闭对比窗口或Ctrl+C退出会尝试将ARM0回到IDLE并断开SDK；右臂不控制。运行中会替换普通双目预览，本机状态及截图仍写`runtime/rectified_pro/`。部署包代码和参数不修改。
+
+### 实时对比与正式采集的启动条件
+
+实时对比窗口先打开并持续显示等待状态：独立完成控制器版本、IDLE、MDH、限位和反馈预检后进入左臂拖动，不等待合格双目帧；视觉/FK数值仍须通过双时差≤10ms、曝光锁定、相机身份/标定校验。不再要求连续三个5秒窗口各25帧；这项吞吐门槛只属于正式50帧/点采集，采集入口保持原样。后续测量超过250ms或关节反馈过期时隐藏数值并显示WAIT，不会把旧数值作为实时值。控制器故障/被占用时，尝试清理连接与IDLE，并在画面显示原因。实时流的“Cannot query video position”警告不是退出原因。

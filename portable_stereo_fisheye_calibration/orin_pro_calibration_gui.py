@@ -17,8 +17,8 @@ import paramiko
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def request(client, path):
-    channel = client.get_transport().open_channel('direct-tcpip', ('127.0.0.1', 8766), ('127.0.0.1', 0))
+def request(client, path, port=8766):
+    channel = client.get_transport().open_channel('direct-tcpip', ('127.0.0.1', port), ('127.0.0.1', 0))
     channel.settimeout(30)
     try:
         channel.sendall(f'GET {path} HTTP/1.0\r\nHost: localhost\r\n\r\n'.encode())

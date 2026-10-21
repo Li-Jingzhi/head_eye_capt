@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Deploy the new Orin Pro calibration and open rectified stereo preview."""
 import getpass
+import hashlib
 import os
 from pathlib import Path
 import subprocess
@@ -17,11 +18,20 @@ def remote(client,command):
     return text
 
 
-def main():
+def prepare_sender(reuse_running=False):
     password=os.environ.get('ORIN_PRO_PASSWORD') or getpass.getpass('Orin Pro password: ')
     client=paramiko.SSHClient();client.load_system_host_keys();client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     client.connect('192.168.12.123',username='marvin',password=password,look_for_keys=False,allow_agent=False,timeout=10)
     try:
+        if reuse_running:
+            active=remote(client,"pgrep -f '[/]home/marvin/head_eye_pro/pro_sender.py' || true")
+            if active.strip():
+                hashes=remote(client,'sha256sum /home/marvin/head_eye_pro/raw_fisheye_stereo.json /home/marvin/head_eye_pro/rectified_stereo.json').splitlines()
+                expected=[hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in
+                    ('configs/orin_pro_raw_fisheye_stereo_20261019.json','configs/orin_pro_rectified_stereo_20261019.json')]
+                if [line.split()[0] for line in hashes]==expected:
+                    print('Reusing running Orin stereo sender; calibration hashes match.',flush=True)
+                    return
         with client.open_sftp() as sftp:
             for local,name in [('orin_rectified_stream/pro_sender.py','pro_sender.py'),('orin_rectified_stream/stereo_pairing.py','stereo_pairing.py'),('capt_head/yellow_inspection.py','yellow_inspection.py'),('capt_head/subpixel_ball.py','subpixel_ball.py'),('configs/orin_pro_rectified_stereo_20261019.json','rectified_stereo.json')]:
                 sftp.put(str(ROOT/local),'/home/marvin/head_eye_pro/'+name)
@@ -37,6 +47,10 @@ def main():
         print(remote(client,'tail -12 /home/marvin/head_eye_pro/rectified_sender.log'),flush=True)
         if not remote(client,"pgrep -f '[/]home/marvin/head_eye_pro/pro_sender.py' || true").strip():raise RuntimeError('Rectified sender exited')
     finally:client.close()
+
+
+def main():
+    prepare_sender()
     subprocess.run([sys.executable,str(ROOT/'orin_rectified_stream/pro_viewer.py')],check=True)
 
 
