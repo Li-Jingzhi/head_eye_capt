@@ -38,6 +38,16 @@ def transform(value, name):
     return T
 
 
+def affine_transform(value, name, scale_bounds=(.9, 1.1)):
+    T = array(value, (4, 4), name)
+    singular = np.linalg.svd(T[:3, :3], compute_uv=False)
+    if (not np.allclose(T[3], [0, 0, 0, 1], atol=1e-12, rtol=0) or
+            np.linalg.det(T[:3, :3]) <= 0 or
+            singular.min() < scale_bounds[0] or singular.max() > scale_bounds[1]):
+        raise CalibrationError(f'{name} must be a bounded invertible affine map')
+    return T
+
+
 class StereoRobot:
     """Load once, call predict for every synchronized stereo detection.
 
@@ -51,19 +61,28 @@ class StereoRobot:
         self.calibration_dir = directory.resolve()
         try:
             manifest = json.loads((directory / 'manifest.json').read_text())
-            if not isinstance(manifest, dict) or manifest.get('schema') != 'stereo_robot_point_bundle_v2':
-                raise CalibrationError('Expected a v2 point-only calibration bundle; re-export older bundles')
+            if not isinstance(manifest, dict) or manifest.get('schema') not in (
+                    'stereo_robot_point_bundle_v2', 'stereo_robot_point_bundle_v3'):
+                raise CalibrationError('Expected a v2/v3 point calibration bundle')
+            self.joint_model = manifest['schema'] == 'stereo_robot_point_bundle_v3'
             for filename, expected in manifest['sha256'].items():
                 if Path(filename).name != filename:
                     raise CalibrationError('Calibration manifest filenames must be local basenames')
                 if hashlib.sha256((directory / filename).read_bytes()).hexdigest() != expected:
                     raise CalibrationError(f'Calibration hash mismatch: {filename}')
             required = {'raw_fisheye.json', 'rectified_stereo.json', 'arms.json'}
+            if self.joint_model:
+                required |= {'observation_correction.json', 'arm_alignment.json', 'robot_geometry.ini', 'robot_model.json',
+                             'calibration_quality.json'}
             if not required.issubset(manifest['sha256']):
                 raise CalibrationError('Calibration manifest is incomplete')
             self.raw = json.loads((directory / 'raw_fisheye.json').read_text())
             self.stereo = json.loads((directory / 'rectified_stereo.json').read_text())
             self.arms = json.loads((directory / 'arms.json').read_text())
+            self.correction = (json.loads((directory/'observation_correction.json').read_text())
+                               if self.joint_model else None)
+            self.quality = (json.loads((directory/'calibration_quality.json').read_text())
+                            if self.joint_model else None)
             self.alignment = (json.loads((directory/'arm_alignment.json').read_text())
                               if 'arm_alignment.json' in manifest['sha256'] else None)
             self.robot_model = (json.loads((directory/'robot_model.json').read_text())
@@ -76,11 +95,37 @@ class StereoRobot:
         self.bundle_id = hashlib.sha256((directory / 'manifest.json').read_bytes()).hexdigest()
         try:
             self._validate()
-        except (KeyError, TypeError) as error:
+        except CalibrationError:
+            raise
+        except (KeyError, TypeError, ValueError) as error:
             raise CalibrationError(f'Incomplete calibration: {error}') from error
 
     def _validate(self):
         raw, stereo = self.raw, self.stereo
+        self.map_key = 'observation_from_mdh_T' if self.joint_model else 'camera_from_mdh_T'
+        if self.joint_model:
+            c = self.correction
+            if (not isinstance(c, dict) or c.get('schema') != 'shared_gaussian_observation_correction_v1'
+                    or c.get('units') != 'm'):
+                raise CalibrationError('Invalid common observation correction')
+            centers = np.asarray(c['kernel_centers_m'], dtype=float)
+            if centers.ndim != 2 or centers.shape[1] != 3 or not len(centers):
+                raise CalibrationError('Kernel centers must be a nonempty Nx3 array')
+            self.kernel_centers = array(centers, centers.shape, 'kernel centers')
+            if np.any(centers[:, 2] <= 0):
+                raise CalibrationError('Kernel centers must have positive depth')
+            self.kernel_coefficients = array(c['kernel_coefficients_m'], centers.shape, 'kernel coefficients')
+            self.kernel_length = float(array(c['kernel_length_m'], (), 'kernel length'))
+            alpha = float(array(c['kernel_regularization'], (), 'kernel regularization'))
+            if self.kernel_length <= 0 or alpha <= 0:
+                raise CalibrationError('Kernel length and regularization must be positive')
+            pf = array(c['shared_pf_m'], (3,), 'shared pF')
+            if np.linalg.norm(pf) > .2:
+                raise CalibrationError('Invalid shared tool offset')
+            if (not isinstance(self.quality, dict) or
+                    self.quality.get('source_model_sha256') != c.get('source_model_sha256') or
+                    self.quality.get('variant') != c.get('variant')):
+                raise CalibrationError('Joint correction and validation provenance disagree')
         if self.robot_model is not None:
             if not self.mdh_sha256:
                 raise CalibrationError('Robot model requires the source robot_geometry.ini')
@@ -144,7 +189,14 @@ class StereoRobot:
                 raise CalibrationError(f'{side} arm calibration belongs to a different stereo model')
             if self.mdh_sha256 and arm.get('mdh_sha256') != self.mdh_sha256:
                 raise CalibrationError(f'{side} arm calibration belongs to different robot geometry')
-            transform(arm['camera_from_mdh_T'], f'{side}.camera_from_mdh_T')
+            if self.joint_model:
+                if arm.get('mapping_model') != 'shared_gaussian_affine':
+                    raise CalibrationError('Joint bundle requires affine maps with common correction')
+                if arm.get('registration_sha256') != self.correction['source_model_sha256']:
+                    raise CalibrationError('Arm map and common correction provenance disagree')
+                affine_transform(arm[self.map_key], f'{side}.{self.map_key}')
+            else:
+                transform(arm[self.map_key], f'{side}.{self.map_key}')
             base = arm.get('base_from_mdh_T')
             if base is not None:
                 transform(base, f'{side}.base_from_mdh_T')
@@ -160,20 +212,38 @@ class StereoRobot:
                     raise CalibrationError('Camera calibration bounds must increase')
         if self.alignment is not None:
             if (not isinstance(self.alignment,dict) or
-                    self.alignment.get('schema') != 'head_eye_pro_dual_arm_alignment_v1' or
+                    self.alignment.get('schema') != ('stereo_robot_affine_dual_arm_alignment_v1' if self.joint_model
+                                                     else 'head_eye_pro_dual_arm_alignment_v1') or
                     self.alignment.get('units') != 'm' or
                     self.alignment.get('reference_frame') != 'right_arm_mdh_parent' or
                     self.alignment.get('source_frame') != 'left_arm_mdh_parent' or
                     any(self.arms[side] is None for side in ('right','left'))):
                 raise CalibrationError('Invalid dual-arm alignment metadata')
-            aligned = transform(self.alignment['right_mdh_from_left_mdh_T'], 'right_mdh_from_left_mdh_T')
-            if not np.allclose(np.asarray(self.arms['right']['camera_from_mdh_T']) @ aligned,
-                               self.arms['left']['camera_from_mdh_T'],atol=1e-8,rtol=0):
+            aligned = (affine_transform(self.alignment['right_mdh_from_left_mdh_T'],
+                                       'right_mdh_from_left_mdh_T', (.8, 1.25)) if self.joint_model else
+                       transform(self.alignment['right_mdh_from_left_mdh_T'], 'right_mdh_from_left_mdh_T'))
+            if not np.allclose(np.asarray(self.arms['right'][self.map_key]) @ aligned,
+                               self.arms['left'][self.map_key],atol=1e-8,rtol=0):
                 raise CalibrationError('Dual-arm alignment disagrees with camera registrations')
             for side in ('right','left'):
                 pf = array(self.alignment['flange_to_ball_center_m'][side],(3,),f'{side}.pF evidence')
                 if np.linalg.norm(pf) > .2:
                     raise CalibrationError('Invalid calibrated flange offset evidence')
+                if self.joint_model and not np.allclose(pf, self.correction['shared_pf_m'], atol=1e-12, rtol=0):
+                    raise CalibrationError('Both arms must use exactly the common pF')
+        self.inverse_maps = {side:np.linalg.inv(np.asarray(profile[self.map_key]))
+                             for side,profile in self.arms.items() if profile is not None}
+
+    def _correct_camera(self, camera):
+        if not self.joint_model:
+            return camera, None
+        delta = self.kernel_centers-camera
+        distance2 = np.einsum('ij,ij->i', delta, delta)
+        weights = np.exp(-.5*(np.sqrt(distance2)/self.kernel_length)**2)
+        corrected = camera+weights@self.kernel_coefficients
+        if not np.isfinite(corrected).all() or corrected[2] <= 0:
+            raise CalibrationError('Common correction produced invalid camera coordinates')
+        return corrected, float(np.sqrt(distance2.min()))
 
     @property
     def available_arms(self):
@@ -236,8 +306,9 @@ class StereoRobot:
         camera, reprojection = self._triangulate(uv)
         if not .15 <= camera[2] <= 5. or reprojection > .5:
             raise CalibrationError('Depth/reprojection outside supported 0.15..5m / 0.5px range')
-        T = np.asarray(profile['camera_from_mdh_T'])
-        target = T[:3, :3].T @ (camera - T[:3, 3])
+        corrected, nearest = self._correct_camera(camera)
+        inverse = self.inverse_maps[arm]
+        target = inverse[:3, :3] @ corrected + inverse[:3, 3]
         frame = f'{arm}_arm_mdh_parent'
         if base is not None:
             B = np.asarray(base)
@@ -247,7 +318,9 @@ class StereoRobot:
         bounds = profile.get('camera_calibration_bounds_m')
         in_range = None if bounds is None else bool(np.all(camera >= bounds['min']) and np.all(camera <= bounds['max']))
         return dict(xyz=(target * scale).tolist(), units=units, arm=arm, frame=frame,
-                      camera_xyz_m=camera.tolist(), rectified_pixels=uv.tolist(),
+                      camera_xyz_m=camera.tolist(), corrected_camera_xyz_m=corrected.tolist(),
+                      mapping_model='shared_gaussian_affine' if self.joint_model else 'rigid',
+                      nearest_calibration_point_distance_m=nearest, rectified_pixels=uv.tolist(),
                       reprojection_error_px=reprojection, within_calibration_volume=in_range,
                       base_frame_verified=verified,
                       independently_verified=profile.get('independently_verified') is True,

@@ -1,8 +1,8 @@
 {
   "xyz": [
-    438.27968920477656,
-    122.55844738466064,
-    60.17997908142855
+    438.6844767917864,
+    121.6998547580641,
+    59.20564201734001
   ],
   "units": "mm",
   "arm": "left",
@@ -12,6 +12,13 @@
     0.09181843313996718,
     0.4403718144746972
   ],
+  "corrected_camera_xyz_m": [
+    0.053133644147627584,
+    0.09158709075174283,
+    0.44026403792713
+  ],
+  "mapping_model": "shared_gaussian_affine",
+  "nearest_calibration_point_distance_m": 0.0175193124869073,
   "rectified_pixels": [
     710.0,
     569.0,
@@ -22,7 +29,5 @@
   "within_calibration_volume": true,
   "base_frame_verified": false,
   "independently_verified": false,
-  "bundle_id": "0bc68f1f2e46cd21c3eb26618400901cf00e17fedbe2039d8753d974d12e4523",
-  "id": "example-left-target",
-  "ok": true
+  "bundle_id": "a473f5f64f33b4434e6a8cc9af3164c4ee41f8e0e7616700f40adbff8e002b55"
 }

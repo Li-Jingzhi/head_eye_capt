@@ -23,6 +23,8 @@ def main():
         parser.exit(2, str(error) + '\n')
     if args.check:
         print(json.dumps(dict(available_arms=model.available_arms, bundle_id=model.bundle_id,
+                              mapping_model='shared_gaussian_affine' if model.joint_model else 'rigid',
+                              model_variant=model.correction['variant'] if model.joint_model else None,
                               frames={side: profile.get('base_frame') if profile.get('base_from_mdh_T') is not None
                                       else f'{side}_arm_mdh_parent' for side, profile in model.arms.items() if profile},
                               base_frame_verified={side: bool(profile.get('base_from_mdh_T') is not None and

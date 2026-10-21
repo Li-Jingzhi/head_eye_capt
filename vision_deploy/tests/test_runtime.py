@@ -40,8 +40,16 @@ class RuntimeTest(unittest.TestCase):
         self.model = StereoRobot()
         self.camera = np.array([.03, .02, .4])
         self.pixels = project(self.camera, self.model)
-        self.T = np.array(self.model.arms['right']['camera_from_mdh_T'])
-        self.expected = self.T[:3, :3].T @ (self.camera - self.T[:3, 3])
+        self.T = np.array(self.model.arms['right']['observation_from_mdh_T'])
+        self.expected = self.expected_target(self.camera, 'right')
+
+    def expected_target(self, camera, side):
+        camera = np.asarray(camera)
+        c = self.model.correction
+        distance2 = np.sum((np.asarray(c['kernel_centers_m'])-camera)**2, axis=1)
+        corrected = camera+np.exp(-distance2/(2*c['kernel_length_m']**2))@np.asarray(c['kernel_coefficients_m'])
+        T = np.asarray(self.model.arms[side]['observation_from_mdh_T'])
+        return np.linalg.solve(T[:3,:3],corrected-T[:3,3])
 
     def test_point_and_units_and_signed_baseline(self):
         self.assertLess(self.pixels[0] - self.pixels[2], 0)
@@ -72,7 +80,7 @@ class RuntimeTest(unittest.TestCase):
         for camera in ([0., 0., .3], [.05, -.01, .6], [-.1, .1, .5]):
             with self.subTest(camera=camera):
                 result = self.model.predict(project(camera, self.model))
-                expected = self.T[:3, :3].T @ (np.array(camera) - self.T[:3, 3])
+                expected = self.expected_target(camera, 'right')
                 np.testing.assert_allclose(result['xyz'], expected, atol=1e-10)
                 self.assertNotIn('flange_xyz', result)
 
@@ -122,9 +130,8 @@ class RuntimeTest(unittest.TestCase):
 
     def test_left_and_right_use_their_own_calibrations(self):
         self.assertEqual(self.model.available_arms, ['right','left'])
-        left_T=np.array(self.model.arms['left']['camera_from_mdh_T'])
         result=self.model.predict(self.pixels,arm='left')
-        np.testing.assert_allclose(result['xyz'],left_T[:3,:3].T@(self.camera-left_T[:3,3]),atol=1e-10)
+        np.testing.assert_allclose(result['xyz'],self.expected_target(self.camera,'left'),atol=1e-10)
         self.assertEqual(result['frame'],'left_arm_mdh_parent')
         alignment=np.array(self.model.alignment['right_mdh_from_left_mdh_T'])
         mapped=alignment[:3,:3]@result['xyz']+alignment[:3,3]
@@ -135,10 +142,43 @@ class RuntimeTest(unittest.TestCase):
             arms['left'] = None
             (bundle/'arm_alignment.json').unlink()
             (bundle / 'arms.json').write_text(json.dumps(arms)); rehash(bundle)
-            model = StereoRobot(bundle)
-            with self.assertRaisesRegex(CalibrationError,'left arm is not calibrated'):
-                model.predict(self.pixels,arm='left')
-            np.testing.assert_allclose(model.predict(self.pixels, arm='right')['xyz'], self.expected, atol=1e-10)
+            with self.assertRaises(CalibrationError):
+                StereoRobot(bundle)
+
+    def test_latest_joint_registration_has_identical_pf(self):
+        expected_pf = [.0008051722072317555,.0002508674846906257,.10058184753499466]
+        for side in ('right','left'):
+            np.testing.assert_allclose(self.model.alignment['flange_to_ball_center_m'][side], expected_pf, rtol=0, atol=1e-15)
+            self.assertTrue(self.model.arms[side]['parameter_constraints']['shared_pf'])
+        self.assertFalse(self.model.alignment['right_anchor_fixed'])
+        source = DEPLOY.parent / 'reports/shared_pf_joint_kernel_20261021/affine_l60_a3.json'
+        if source.exists():
+            model = json.loads(source.read_text())
+            self.assertEqual(self.model.arms['left']['registration_sha256'], hashlib.sha256(source.read_bytes()).hexdigest())
+            for side in ('left','right'):
+                np.testing.assert_array_equal(self.model.arms[side]['observation_from_mdh_T'], model['observation_from_mdh_T'][side])
+
+    def test_rehashed_invalid_common_corrections_are_rejected(self):
+        for change in ('zero_length', 'nan', 'shape', 'unshared_pf'):
+            with self.subTest(change=change), tempfile.TemporaryDirectory() as directory:
+                bundle=Path(directory)/'bundle';shutil.copytree(BUNDLE,bundle)
+                c=json.loads((bundle/'observation_correction.json').read_text())
+                if change=='zero_length':c['kernel_length_m']=0
+                if change=='nan':c['kernel_coefficients_m'][0][0]=float('nan')
+                if change=='shape':c['kernel_coefficients_m'].pop()
+                if change=='unshared_pf':c['shared_pf_m'][2]+=.001
+                (bundle/'observation_correction.json').write_text(json.dumps(c));rehash(bundle)
+                with self.assertRaises(CalibrationError):StereoRobot(bundle)
+
+    def test_common_field_is_applied_once_and_affine_inverse_is_used(self):
+        result=self.model.predict(self.pixels)
+        corrected=np.array(result['corrected_camera_xyz_m'])
+        self.assertGreater(np.linalg.norm(corrected-self.camera),1e-6)
+        np.testing.assert_allclose(self.T[:3,:3]@result['xyz']+self.T[:3,3],corrected,atol=1e-12)
+        self.assertEqual(result['mapping_model'],'shared_gaussian_affine')
+        self.assertGreater(result['nearest_calibration_point_distance_m'],0)
+        wrong=self.T[:3,:3].T@(corrected-self.T[:3,3])
+        self.assertGreater(np.linalg.norm(wrong-np.array(result['xyz'])),1e-5)
 
     def test_measured_base_transform_and_strict_frame_requirement(self):
         with self.assertRaisesRegex(CalibrationError, 'base mapping is unverified'):
@@ -174,7 +214,7 @@ class RuntimeTest(unittest.TestCase):
                 arms = json.loads((bundle / 'arms.json').read_text())
                 stereo = json.loads((bundle / 'rectified_stereo.json').read_text())
                 if change == 'hash': arms['right']['stereo_model_sha256'] = 'wrong'
-                if change == 'rotation': arms['right']['camera_from_mdh_T'][0][0] += .1
+                if change == 'rotation': arms['right']['observation_from_mdh_T'][0][0] += .3
                 if change == 'projection': stereo['right_P'][0][3] *= -1
                 if change == 'pixel_size': stereo['image_size'][0] = 0
                 (bundle / 'arms.json').write_text(json.dumps(arms))
@@ -205,15 +245,16 @@ class RuntimeTest(unittest.TestCase):
         self.assertIn('unverified', record['error'])
         self.assertNotIn('xyz', record)
 
-    def test_default_bundle_matches_latest_rigid_calibration(self):
-        path = DEPLOY.parent / 'reports/pro_recalibration_20261020_360/rigid_candidate.json'
+    def test_default_bundle_matches_latest_joint_calibration(self):
+        path = DEPLOY.parent / 'reports/shared_pf_joint_kernel_20261021/affine_l60_a3.json'
         if not path.exists(): self.skipTest('Source registration is only present in the source repository')
         source = json.loads(path.read_text())
         right = self.model.arms['right']
-        self.assertEqual(source['method'], 'rigid_l2')
+        self.assertEqual(source['variant'], 'affine_l60_a3')
         self.assertEqual(right['registration_sha256'], hashlib.sha256(path.read_bytes()).hexdigest())
         self.assertEqual(right['validation_metrics']['samples'], 288)
-        np.testing.assert_allclose(right['camera_from_mdh_T'], source['arm_to_camera_T_before_depth_mapping'], atol=1e-12)
+        np.testing.assert_allclose(right['observation_from_mdh_T'], source['observation_from_mdh_T']['right'], atol=1e-12)
+        np.testing.assert_array_equal(self.model.correction['kernel_coefficients_m'],source['kernel_coefficients_m'])
 
     def test_sample_result_matches_current_bundle(self):
         sample = json.loads((DEPLOY / 'examples/sample_request.json').read_text())
@@ -232,13 +273,13 @@ class RuntimeTest(unittest.TestCase):
         records=[json.loads(line) for line in gzip.decompress(path.read_bytes()).splitlines()]
         rows=[row for row in records if row.get('capture_valid') is True]
         self.assertEqual(len(rows),424);self.assertEqual(len(records)-len(rows),58)
-        count=0;right_T=np.array(self.model.arms['right']['camera_from_mdh_T'])
+        count=0
         for row in rows:
             for frame in row['camera_window_frames']:
                 result=self.model.predict(frame['corrected_stereo_pixels'],arm='right')
                 camera=np.array(frame['center_left_camera_m'])
                 np.testing.assert_allclose(result['camera_xyz_m'],camera,atol=1e-12,rtol=0)
-                np.testing.assert_allclose(result['xyz'],right_T[:3,:3].T@(camera-right_T[:3,3]),atol=1e-12,rtol=0)
+                np.testing.assert_allclose(result['xyz'],self.expected_target(camera,'right'),atol=1e-12,rtol=0)
                 count+=1
         self.assertEqual(count,21200)
 
@@ -308,7 +349,8 @@ class ExportTest(unittest.TestCase):
             settings = directory / 'settings.json'
             settings.write_text(json.dumps({'right': dict(base_from_mdh_T=B.tolist(),
                 base_frame='right_arm_base', base_frame_verified=True)}))
-            export_bundle(directory / 'bundle', *self.args, settings=settings)
+            export_bundle(directory / 'bundle', *self.args[:3], settings=settings,
+                          joint=self.repo/'reports/shared_pf_joint_kernel_20261021/affine_l60_a3.json')
             model = StereoRobot(directory / 'bundle')
             camera = np.array([.02, .01, .45]);pixels = project(camera, model)
             reference = StereoRobot().predict(pixels)['xyz']

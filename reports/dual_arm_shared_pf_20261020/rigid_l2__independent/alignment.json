@@ -1,0 +1,31 @@
+{
+  "right_mdh_from_left_mdh_T": [
+    [
+      0.9999859001316004,
+      0.004925546803915178,
+      0.0019845721643345746,
+      0.00026594615402047994
+    ],
+    [
+      0.004925141006652516,
+      -0.999987849513612,
+      0.00020931126644596287,
+      0.0015977040201439197
+    ],
+    [
+      0.001985579023256942,
+      -0.00019953401743744829,
+      -0.9999980088290767,
+      -0.05009268660098453
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "right_anchor_fixed": false,
+  "independently_verified": false,
+  "note": "Both extrinsics re-estimated jointly; this is a candidate, not the deployed fixed-right-anchor alignment."
+}

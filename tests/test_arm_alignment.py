@@ -67,5 +67,24 @@ class ArmAlignmentTest(unittest.TestCase):
         np.testing.assert_allclose(model['left_camera_from_arm_mdh_R'],R,atol=1e-7)
         self.assertLess(model['blocked_cv_metrics']['max_mm'],.001)
 
+    def test_fixed_pf_z_recovers_other_parameters_and_rejects_invalid_constraint(self):
+        from interactive_ball_calibration.pro_fit import solve_fixed_pf_z
+        from scipy.spatial.transform import Rotation
+        rng = np.random.default_rng(101)
+        poses = np.repeat(np.eye(4)[None], 50, axis=0)
+        poses[:, :3, :3] = Rotation.random(50, random_state=rng).as_matrix()
+        poses[:, :3, 3] = rng.uniform(-.3, .3, (50, 3))
+        offset = np.array([.001, -.002, .101])
+        R = Rotation.from_rotvec([.2, -.4, .1]).as_matrix()
+        t = np.array([.1, .2, .3])
+        points = predict(poses, offset, R, t)
+        fitted, fitted_R, fitted_t, _ = solve_fixed_pf_z(poses, points, .101)
+        self.assertEqual(fitted[2], .101)
+        np.testing.assert_allclose(fitted, offset, atol=1e-8)
+        np.testing.assert_allclose(fitted_R, R, atol=1e-8)
+        np.testing.assert_allclose(fitted_t, t, atol=1e-8)
+        for value in (float('nan'), .201):
+            with self.assertRaises(ValueError): solve_fixed_pf_z(poses, points, value)
+
 
 if __name__=='__main__':unittest.main()

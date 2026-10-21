@@ -1,0 +1,224 @@
+{
+  "pf_difference_right_minus_left_mm": [
+    0.8865661952807925,
+    -1.0536612271059906,
+    1.9737031099674591
+  ],
+  "pf_difference_norm_mm": 2.406596261614395,
+  "mdh_rows_numerically_equal": true,
+  "source_summary_script_sha256": "11b2350507db895dc477906672d10f1785dbc91de0beb255f7dc7e4e6349ff9c",
+  "deployment_manifest_sha256": "4468b95484fa4042161d678d12614d37b0bff41dae8493dd4ec2d10e93f6c323",
+  "deployment_modified": false,
+  "per_arm": {
+    "right": {
+      "valid_positions": 288,
+      "valid_frames": 14400,
+      "within_position_3d_jitter_p95_mm": {
+        "median": 0.3315090405705519,
+        "p95": 0.8406670023301268,
+        "maximum": 1.211498584159876
+      },
+      "camera_depth_m": [
+        0.2863616246665093,
+        0.6159329669908555
+      ]
+    },
+    "left": {
+      "valid_positions": 424,
+      "valid_frames": 21200,
+      "within_position_3d_jitter_p95_mm": {
+        "median": 0.3645266356129933,
+        "p95": 0.644923886633232,
+        "maximum": 1.1631988260848607
+      },
+      "camera_depth_m": [
+        0.23881636923674288,
+        0.5615624334568388
+      ]
+    }
+  },
+  "fold_pf": {
+    "rigid_l2/independent": {
+      "right": {
+        "min_mm": [
+          1.0372301236777837,
+          -0.5409873438113092,
+          101.06625620981494
+        ],
+        "max_mm": [
+          1.108754414218524,
+          -0.2521925647571292,
+          101.72024004371642
+        ],
+        "std_mm": [
+          0.024138722140019917,
+          0.1059999938160023,
+          0.2092887499688136
+        ],
+        "note": "Overlapping training folds; descriptive stability, not independent confidence intervals."
+      },
+      "left": {
+        "min_mm": [
+          0.07797271443527165,
+          0.5383453863607907,
+          99.16123629780506
+        ],
+        "max_mm": [
+          0.4665118267569971,
+          1.019255188991044,
+          99.57828656309542
+        ],
+        "std_mm": [
+          0.13341101389769647,
+          0.1692467705568687,
+          0.16278853217756536
+        ],
+        "note": "Overlapping training folds; descriptive stability, not independent confidence intervals."
+      }
+    },
+    "rigid_covariance/shared": {
+      "right": {
+        "min_mm": [
+          0.49577443064305693,
+          -0.0016826446183895213,
+          100.20560711130815
+        ],
+        "max_mm": [
+          0.8480824027091087,
+          0.10180642821481636,
+          100.51314783727577
+        ],
+        "std_mm": [
+          0.1433591504440412,
+          0.03386748458350307,
+          0.11346707506755012
+        ],
+        "note": "Overlapping training folds; descriptive stability, not independent confidence intervals."
+      },
+      "left": {
+        "min_mm": [
+          0.49577443064305693,
+          -0.0016826446183895213,
+          100.20560711130815
+        ],
+        "max_mm": [
+          0.8480824027091087,
+          0.10180642821481636,
+          100.51314783727577
+        ],
+        "std_mm": [
+          0.1433591504440412,
+          0.03386748458350307,
+          0.11346707506755012
+        ],
+        "note": "Overlapping training folds; descriptive stability, not independent confidence intervals."
+      }
+    },
+    "affine/near_0p5mm": {
+      "right": {
+        "min_mm": [
+          0.7339709346661216,
+          -0.010879760655365398,
+          100.55405923830199
+        ],
+        "max_mm": [
+          0.9691326047778975,
+          0.1838139241659627,
+          101.08387397545711
+        ],
+        "std_mm": [
+          0.08554500589583891,
+          0.06632997616098421,
+          0.18168541189492127
+        ],
+        "note": "Overlapping training folds; descriptive stability, not independent confidence intervals."
+      },
+      "left": {
+        "min_mm": [
+          0.44529580007131025,
+          0.2777953739394474,
+          100.26538410370716
+        ],
+        "max_mm": [
+          0.6804574701830847,
+          0.4724890587607755,
+          100.79519884086228
+        ],
+        "std_mm": [
+          0.08554500589583833,
+          0.06632997616098421,
+          0.18168541189492127
+        ],
+        "note": "Overlapping training folds; descriptive stability, not independent confidence intervals."
+      }
+    }
+  },
+  "independently_verified": false,
+  "left_fixed_to_deployed_right_pf_fit_only": {
+    "pf_m": [
+      0.0010818591758443583,
+      -0.00032812947027856005,
+      0.10134772931324594
+    ],
+    "metrics": {
+      "samples": 424,
+      "mean_mm": 0.9762706866831157,
+      "rms_mm": 1.0939304537226713,
+      "median_mm": 0.8907365446318102,
+      "p95_mm": 1.890800445700501,
+      "max_mm": 2.937068209901741,
+      "axis_bias_mm": [
+        -7.20073895688486e-16,
+        -2.0734855132666176e-13,
+        2.439577627960968e-13
+      ],
+      "axis_rms_mm": [
+        0.8317326946004397,
+        0.515993890335478,
+        0.48852314935020186
+      ],
+      "fraction_within_1mm": 0.5731132075471698
+    },
+    "note": "Conditional left in-sample fit only; right calibration fitted on full right data, not a joint cross-validation result."
+  },
+  "shared_rigid_candidate_shift_from_deployed": {
+    "right": {
+      "samples": 288,
+      "mean_mm": 1.1197718901366147,
+      "rms_mm": 1.1201847000587288,
+      "median_mm": 1.1132283542128487,
+      "p95_mm": 1.175355465631233,
+      "max_mm": 1.201315455552775,
+      "axis_bias_mm": [
+        -0.2365683465904524,
+        0.05347159457355135,
+        1.0899361873532964
+      ],
+      "axis_rms_mm": [
+        0.2469640693626015,
+        0.07369046981692111,
+        1.0901340400830024
+      ],
+      "fraction_within_1mm": 0.0
+    },
+    "left": {
+      "samples": 424,
+      "mean_mm": 1.1936175324785097,
+      "rms_mm": 1.1947778718722255,
+      "median_mm": 1.188750042985312,
+      "p95_mm": 1.2927245830142584,
+      "max_mm": 1.3677765231320347,
+      "axis_bias_mm": [
+        0.6454299059298247,
+        -0.9640783567888624,
+        -0.2238222328420226
+      ],
+      "axis_rms_mm": [
+        0.654335595141349,
+        0.9646242061603868,
+        0.2623723173964525
+      ],
+      "fraction_within_1mm": 0.0
+    }
+  }
+}

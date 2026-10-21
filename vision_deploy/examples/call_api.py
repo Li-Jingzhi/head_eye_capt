@@ -15,6 +15,6 @@ print('Target XYZ:', result['xyz'], result['units'], 'in', result['frame'])
 # result = model.predict([uL, vL, uR, vR], arm='right', units='mm')
 # After configuring a measured base transform, enforce actual base coordinates:
 # result = model.predict(pixels, arm='right', units='mm', require_base=True)
-# The bundled left calibration is independent; arm selects the output frame.
+# Both arm maps share one observation correction; arm selects the output frame.
 left = model.predict(sample['pixels'], arm='left', units='mm')
 print('Same target in left MDH parent:', left['xyz'])

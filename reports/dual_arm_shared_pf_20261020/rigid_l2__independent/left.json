@@ -1,0 +1,140 @@
+{
+  "method": "rigid_l2",
+  "parameters": [
+    1.755253153525562,
+    0.7529336744925309,
+    1.7607268110790828,
+    -0.004672436702255059,
+    -0.1363274150161395,
+    0.0462733249935106,
+    0.00019529298056356574,
+    0.0007255317568274305,
+    0.09937402620327848
+  ],
+  "parameter_count": 9,
+  "flange_to_ball_center_m": [
+    0.00019529298056356574,
+    0.0007255317568274305,
+    0.09937402620327848
+  ],
+  "optimizer_evaluations": 4,
+  "jacobian_condition": 26.31473558688616,
+  "jacobian_condition_note": "Parameter units differ; diagnostic only, not a covariance estimate.",
+  "left_camera_from_arm_mdh_R": [
+    [
+      -0.008443456750456657,
+      0.012685295880632497,
+      0.9998838889123696
+    ],
+    [
+      0.7141885881404838,
+      -0.6997945275096322,
+      0.014909052199007344
+    ],
+    [
+      0.6999023993443696,
+      0.7142315468641742,
+      -0.003151008727899307
+    ]
+  ],
+  "left_camera_from_arm_mdh_t_m": [
+    -0.004672436702255059,
+    -0.1363274150161395,
+    0.0462733249935106
+  ],
+  "arm_to_camera_T_before_depth_mapping": [
+    [
+      -0.008443456750456657,
+      0.012685295880632497,
+      0.9998838889123696,
+      -0.004672436702255059
+    ],
+    [
+      0.7141885881404838,
+      -0.6997945275096322,
+      0.014909052199007344,
+      -0.1363274150161395
+    ],
+    [
+      0.6999023993443696,
+      0.7142315468641742,
+      -0.003151008727899307,
+      0.0462733249935106
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "camera_to_arm_T_after_undoing_depth_mapping": [
+    [
+      -0.008443456750456714,
+      0.7141885881404841,
+      0.6999023993443696,
+      0.0649372213494039
+    ],
+    [
+      0.012685295880632443,
+      -0.6997945275096323,
+      0.7142315468641742,
+      -0.128391776224441
+    ],
+    [
+      0.9998838889123698,
+      0.01490905219900735,
+      -0.0031510087278993864,
+      0.006850214378102516
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "schema": "head_eye_pro_candidate_observation_model_v1",
+  "units": "m",
+  "input": "FK flange pose in left-arm MDH parent",
+  "output": "archived rectified left-camera sphere-center measurement domain",
+  "independently_verified": false,
+  "cv_metrics": {
+    "samples": 424,
+    "mean_mm": 0.7598979640254092,
+    "rms_mm": 0.8663692126609635,
+    "median_mm": 0.6603616682292301,
+    "p95_mm": 1.520132017585269,
+    "max_mm": 3.2760428943214364,
+    "axis_bias_mm": [
+      -0.015489543962279388,
+      0.05348265292066416,
+      -0.0017642977399159434
+    ],
+    "axis_rms_mm": [
+      0.6460507050875057,
+      0.48711007396627215,
+      0.3097383975926895
+    ],
+    "fraction_within_1mm": 0.7735849056603774
+  },
+  "bounds": {
+    "camera_min_m": [
+      -0.22765684903115566,
+      -0.09232708361338232,
+      0.23881636923674288
+    ],
+    "camera_max_m": [
+      0.13195783484580098,
+      0.18634110797882364,
+      0.5615624334568388
+    ]
+  },
+  "source_capture_sha256": "f4bf745f2b0b2436fba9d9f1e8509faf6a57c7a923feaa4a74eae50019c2c26a",
+  "mdh_sha256": "c8d0634e66a697a19fbbb1c15f177106ad13764907ad934ff6138138183918bc",
+  "source_calibration_sha256": "65114bda1bc22c954af538e1a710ccd1ec4fb26f2f24f8f9f6da01516d1a80be",
+  "stereo_model_sha256": "aeb16f4fa40c1be996475bdcb3fd7a602f4fe1fcfb26711348c86071f2153a09",
+  "pf_policy": "independent",
+  "right_anchor_fixed": false,
+  "validation_note": "Per-candidate CV uses no held-out points; selected candidate score has selection bias, see nested_selection."
+}

@@ -1,0 +1,95 @@
+{
+  "method": "affine",
+  "parameters": [
+    -0.0113929051417944,
+    0.009989859459023512,
+    1.0030900556567859,
+    0.7115766015290441,
+    -0.70076068194093,
+    0.016851583868657732,
+    0.6963508733905351,
+    0.7109860631036936,
+    -0.0032803005243670818,
+    -0.0025085621527266167,
+    -0.13631555457864994,
+    0.04846130026973588,
+    0.0008201143475872864,
+    0.00015116644429870373,
+    0.10058510429277863
+  ],
+  "flange_to_ball_center_m": [
+    0.0008201143475872864,
+    0.00015116644429870373,
+    0.10058510429277863
+  ],
+  "linear_map_singular_values": [
+    1.0039886134739253,
+    0.9988600770394336,
+    0.9943902232506113
+  ],
+  "arm_to_observation_linear_M": [
+    [
+      -0.0113929051417944,
+      0.009989859459023512,
+      1.0030900556567859
+    ],
+    [
+      0.7115766015290441,
+      -0.70076068194093,
+      0.016851583868657732
+    ],
+    [
+      0.6963508733905351,
+      0.7109860631036936,
+      -0.0032803005243670818
+    ]
+  ],
+  "translation_m": [
+    -0.0025085621527266167,
+    -0.13631555457864994,
+    0.04846130026973588
+  ],
+  "schema": "head_eye_pro_candidate_observation_model_v1",
+  "units": "m",
+  "input": "FK flange pose in left-arm MDH parent",
+  "output": "archived rectified left-camera sphere-center measurement domain",
+  "independently_verified": false,
+  "cv_metrics": {
+    "samples": 424,
+    "mean_mm": 0.7587887338844702,
+    "rms_mm": 0.8702632864802846,
+    "median_mm": 0.6843775851296177,
+    "p95_mm": 1.6503708359911062,
+    "max_mm": 3.2981951505584925,
+    "axis_bias_mm": [
+      0.028510171303265993,
+      0.01531272544888746,
+      -0.02975680796123122
+    ],
+    "axis_rms_mm": [
+      0.6459991643569869,
+      0.45848276915314057,
+      0.360328763541309
+    ],
+    "fraction_within_1mm": 0.7712264150943396
+  },
+  "bounds": {
+    "camera_min_m": [
+      -0.22765684903115566,
+      -0.09232708361338232,
+      0.23881636923674288
+    ],
+    "camera_max_m": [
+      0.13195783484580098,
+      0.18634110797882364,
+      0.5615624334568388
+    ]
+  },
+  "source_capture_sha256": "f4bf745f2b0b2436fba9d9f1e8509faf6a57c7a923feaa4a74eae50019c2c26a",
+  "mdh_sha256": "c8d0634e66a697a19fbbb1c15f177106ad13764907ad934ff6138138183918bc",
+  "source_calibration_sha256": "65114bda1bc22c954af538e1a710ccd1ec4fb26f2f24f8f9f6da01516d1a80be",
+  "stereo_model_sha256": "aeb16f4fa40c1be996475bdcb3fd7a602f4fe1fcfb26711348c86071f2153a09",
+  "pf_policy": "shared",
+  "right_anchor_fixed": false,
+  "validation_note": "Per-candidate CV uses no held-out points; selected candidate score has selection bias, see nested_selection."
+}

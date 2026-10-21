@@ -1,8 +1,10 @@
 {
-  "schema": "stereo_robot_point_bundle_v2",
+  "schema": "stereo_robot_point_bundle_v3",
   "sha256": {
-    "arm_alignment.json": "49b91fff7765d8b7e29d24858e88a36f3fd5cbbda6ace19380f4c9b1fdde1fc4",
-    "arms.json": "a858ec56a7e5df83d410466d76ee7e6d9376c6f2cf2f5407f3de40ee0db73088",
+    "arm_alignment.json": "78b9a22479e04fcaaac7df77e1ef28be6194012fe14c067f8c6184e992ff8755",
+    "arms.json": "07a43fbe957904b656142a5ece7f12dbad6fd5eda5380d186e125d693be0a9df",
+    "calibration_quality.json": "da1090a2fde0d1509b5a4574f5d8b58c066c078e401128c974aae30f92fc98d0",
+    "observation_correction.json": "de15cf8d75b290a89856f3d31db944af6caf0aa63d51205462ae2df48ca2f808",
     "raw_fisheye.json": "65114bda1bc22c954af538e1a710ccd1ec4fb26f2f24f8f9f6da01516d1a80be",
     "rectified_stereo.json": "aeb16f4fa40c1be996475bdcb3fd7a602f4fe1fcfb26711348c86071f2153a09",
     "robot_geometry.ini": "c8d0634e66a697a19fbbb1c15f177106ad13764907ad934ff6138138183918bc",

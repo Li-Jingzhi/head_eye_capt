@@ -1,0 +1,17 @@
+{
+  "software_tests_passed": 15,
+  "heldout_flange_predictions_recomputed": 14952,
+  "max_saved_csv_recompute_difference_mm": 0.0,
+  "all_folds_cover_each_valid_position_once": true,
+  "both_arms_purged_holdout_verified": true,
+  "nested_choices_and_scores_recomputed": true,
+  "exported_native_model_pairs_checked": 21,
+  "shared_and_near_constraints_verified": true,
+  "deployment_original_left_pf_and_right_anchor_verified": true,
+  "deployment_manifest_sha256": "4468b95484fa4042161d678d12614d37b0bff41dae8493dd4ec2d10e93f6c323",
+  "independent_absolute_accuracy_verified": false,
+  "all_candidates_meet_dual_arm_p95_1mm": false,
+  "any_candidate_meets_dual_arm_p95_1mm": false,
+  "unified_candidate_right_frame_coordinates_checked": 712,
+  "report_links_checked": true
+}

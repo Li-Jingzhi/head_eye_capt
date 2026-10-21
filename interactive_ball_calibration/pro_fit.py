@@ -70,17 +70,42 @@ def blocked_splits(count):
         yield train,held
 
 
-def fit(path,stereo,mdh,raw,*,arm='right'):
+def solve_fixed_pf_z(poses, points, fixed_pf_z_m):
+    """Optimize eight free parameters; pF Z is an exact constraint, not a penalty."""
+    from scipy.optimize import least_squares
+    from scipy.spatial.transform import Rotation
+    if not np.isfinite(fixed_pf_z_m) or abs(fixed_pf_z_m) >= .2:
+        raise ValueError('Fixed pF Z must be finite and within 200mm')
+    offset, R, t, _ = solve_joint(poses, points, iterations=2000)
+    seed = np.r_[Rotation.from_matrix(R).as_rotvec(), t, offset[:2]]
+    def unpack(x):
+        return np.r_[x[6:8], fixed_pf_z_m], Rotation.from_rotvec(x[:3]).as_matrix(), x[3:6]
+    def residual(x):
+        return (predict(poses, *unpack(x)) - points).ravel()
+    result = least_squares(residual, seed, x_scale='jac', max_nfev=1000,
+                           ftol=1e-12, xtol=1e-12, gtol=1e-12)
+    if not result.success or not np.isfinite(result.x).all():
+        raise RuntimeError('Constrained pF optimization failed: ' + result.message)
+    offset, R, t = unpack(result.x)
+    if np.linalg.norm(offset) > .2:
+        raise ValueError('Ball offset exceeds200mm')
+    if np.linalg.matrix_rank(result.jac) < 8:
+        raise ValueError('Insufficient pose excitation for constrained calibration')
+    return offset, R, t, result.nfev
+
+
+def fit(path,stereo,mdh,raw,*,arm='right',fixed_pf_z_m=None):
     rows,rejected=load_capture(path,stereo,mdh,raw,arm=arm);chain=mdh_rows(mdh,0 if arm=='left' else 1)
     poses=np.array([flange_pose(r['q7_deg'],chain) for r in rows]);points=np.array([r['sphere_center_left_camera_m'] for r in rows])
+    solver = (lambda poses, points: solve_joint(poses, points, iterations=2000)) if fixed_pf_z_m is None else (lambda poses, points: solve_fixed_pf_z(poses, points, fixed_pf_z_m))
     cv=np.empty_like(points);fold_ids=np.empty(len(rows),int);folds=[]
     for index,(train,held) in enumerate(blocked_splits(len(rows))):
-        offset,R,t,_=solve_joint(poses[train],points[train],iterations=2000)
+        offset,R,t,_=solver(poses[train],points[train])
         cv[held]=predict(poses[held],offset,R,t);fold_ids[held]=index
         folds.append(dict(fold=index,train_waypoint_indices=[rows[i]['waypoint_index'] for i in train],
             heldout_waypoint_indices=[rows[i]['waypoint_index'] for i in held],metrics=metrics(cv[held]-points[held]),
             flange_to_ball_center_m=offset.tolist()))
-    offset,R,t,_=solve_joint(poses,points,iterations=2000)
+    offset,R,t,_=solver(poses,points)
     if np.linalg.norm(offset)>.2:raise ValueError('Ball offset exceeds200mm')
     fitted=predict(poses,offset,R,t);fit_stats=metrics(fitted-points);cv_stats=metrics(cv-points)
     T=np.eye(4);T[:3,:3]=R;T[:3,3]=t;inverse=np.eye(4);inverse[:3,:3]=R.T;inverse[:3,3]=-R.T@t
@@ -101,6 +126,8 @@ def fit(path,stereo,mdh,raw,*,arm='right'):
         warnings=['Single-session internal consistency, not external absolute accuracy.',
                   '40mm ball diameter assumed; hardware exposure synchronization unverified.',
                   'MDH parent not independently verified as whole-robot base.'])
+    if fixed_pf_z_m is not None:
+        result['parameter_constraints'] = dict(flange_to_ball_center_z_m=fixed_pf_z_m, free_parameter_count=8, source='User-specified exact constraint; not independently measured by this fit')
     errors=[dict(waypoint_index=r['waypoint_index'],fold=int(fold_ids[i]),
         fit_error_mm=float(np.linalg.norm(fitted[i]-points[i])*1000),
         cv_error_mm=float(np.linalg.norm(cv[i]-points[i])*1000)) for i,r in enumerate(rows)]
@@ -113,7 +140,9 @@ def main():
     parser.add_argument('--stereo',default=str(ROOT/'configs/orin_pro_rectified_stereo_20261019.json'))
     parser.add_argument('--raw',default=str(ROOT/'configs/orin_pro_raw_fisheye_stereo_20261019.json'))
     parser.add_argument('--mdh',default=str(ROOT/'configs/1004.ini'));parser.add_argument('--output',required=True)
-    args=parser.parse_args();result,errors=fit(args.capture,args.stereo,args.mdh,args.raw,arm=args.arm)
+    parser.add_argument('--fixed-pf-z-mm',type=float,help='Fix native flange pF Z exactly, in mm')
+    args=parser.parse_args();result,errors=fit(args.capture,args.stereo,args.mdh,args.raw,arm=args.arm,
+        fixed_pf_z_m=None if args.fixed_pf_z_mm is None else args.fixed_pf_z_mm/1000)
     output=Path(args.output);output.parent.mkdir(parents=True,exist_ok=True)
     with output.open('x') as f:json.dump(result,f,indent=2,allow_nan=False);f.write('\n')
     with output.with_suffix('.csv').open('x',newline='') as f:

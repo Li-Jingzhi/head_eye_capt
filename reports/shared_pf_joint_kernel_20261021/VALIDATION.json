@@ -1,0 +1,19 @@
+{
+  "heldout_prediction_rows_recomputed": 17088,
+  "saved_models_checked": 132,
+  "all_positions_covered_once": true,
+  "inner_and_outer_purge_verified": true,
+  "kernel_centers_contain_training_points_only": true,
+  "nested_selection_rule_and_outer_scores_verified": true,
+  "inner_models_serialized": false,
+  "inner_scores_independently_refitted": false,
+  "baseline_matches_deployed_three_metrics": true,
+  "software_test_cases_passed": 5,
+  "source_sha256": "3102222b390645fd3b5059442769f15cd2a1e7c88400dfdfd9dc9d2595ef7f63",
+  "deployment_manifest_sha256": "4468b95484fa4042161d678d12614d37b0bff41dae8493dd4ec2d10e93f6c323",
+  "deployment_modified": false,
+  "independent_absolute_accuracy_verified": false,
+  "selected_meets_all_six_baseline_metrics": true,
+  "nested_process_meets_all_six_baseline_metrics": true,
+  "shared_pf_exact": true
+}

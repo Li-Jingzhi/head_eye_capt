@@ -1,12 +1,16 @@
 # head_eye_pro
 
-## 左臂标定与固定右臂参考（最新）
+## 当前部署：共享pF联合补偿 v3.0.0
 
-已同步至`72fbdbc`。左臂482条位置记录中424有效/58拒绝，用21200帧独立标定R.A0相机外参与pF，分段留出RMS0.866mm/P951.520mm。按用户确认，以既有右臂288点标定为固定锚，生成左→右MDH父系对齐；没有把左臂链直接当作右臂，也没有独立重估右臂相机外参。结果见[左臂与右参考报告](reports/pro_left_registration_20261020_482/report.md)。`vision_deploy` v2.2.0现支持右/左臂输出，默认仍为`right_arm_mdh_parent`。
+`vision_deploy`采用严格共享pF＋各臂仿射映射＋共用高斯补偿，候选`affine_l60_a3`。共享pF=[0.805172207,0.250867485,100.581847535]mm；右/左臂分块留出RMS为0.887/0.841mm、P95为1.611/1.484mm。两臂映射均已联合重估，不再固定旧右臂外参。完整[机理和验证](reports/shared_pf_joint_kernel_20261021/report.md)、[独立迁移与调用说明](vision_deploy/README.md)。wheel和完整ZIP包含全部参数、完整MDH及相机教程，运行只依赖NumPy/OpenCV。
+
+## 历史：左臂标定与固定右臂参考
+
+已同步至`72fbdbc`。左臂482条位置记录中424有效/58拒绝，用21200帧独立标定R.A0相机外参与pF，分段留出RMS0.866mm/P951.520mm。按用户确认，以既有右臂288点标定为固定锚，生成左→右MDH父系对齐；没有把左臂链直接当作右臂，也没有独立重估右臂相机外参。结果见[左臂与右参考报告](reports/pro_left_registration_20261020_482/report.md)。当时的`vision_deploy` v2.4.0支持右/左臂输出，默认仍为`right_arm_mdh_parent`。
 
 ## 最新360点数据重标定
 
-右臂第二批已同步至`236e0db`，以288个有效位置/14400帧重新标定，72个拒绝位置未用于拟合。标准刚体参数在`configs/orin_pro_ball_registration_20261020_288.json`，分段留出RMS0.912mm/P951.678mm；跨会话旧模型→新数据RMS1.046mm、新模型→旧数据RMS1.202mm。该右臂结果现作为双臂部署的固定右参考；仿射实验模型不作为刚体部署参数。多方案和误差见[右臂重标定报告](reports/pro_recalibration_20261020_360/report.md)。
+右臂第二批已同步至`236e0db`，以288个有效位置/14400帧重新标定，72个拒绝位置未用于拟合。标准刚体参数在`configs/orin_pro_ball_registration_20261020_288.json`，分段留出RMS0.912mm/P951.678mm；跨会话旧模型→新数据RMS1.046mm、新模型→旧数据RMS1.202mm。该右臂结果曾作为双臂部署的固定右参考；当前联合补偿部署见本页顶部。多方案和误差见[右臂重标定报告](reports/pro_recalibration_20261020_360/report.md)。
 
 ## 可转移部署的视觉坐标接口
 
@@ -158,3 +162,13 @@ bash scripts/teach_replay_left.sh teach 2>&1 | (trap '' INT; exec tee runtime/le
 `datasets/left_drag_replay_20261020_110645_673779/`包含左臂ARM0/R.A0的完整示教及回放归档：482点，424有效、58无效。有效和无效记录、逐帧证据、完整轨迹、日志及SHA256均保留，统计见目录内清单。现已独立拟合左臂模型及pF，并固定右臂锚完成MDH父系对齐，见本页顶部最新报告。
 
 部署包已包含M6S-CCS-696双7轴机械臂完整MDH配置及[臂型说明](vision_deploy/stereo_robot/docs/robot_model.md)，并附[森云双目连接教程](vision_deploy/stereo_robot/docs/camera_connection.md)。
+
+历史vision_deploy v2.4.0曾恢复左臂424点无约束方案：pF=[0.195295,0.725531,99.374025]mm，留出RMS0.866mm/P951.520mm；对应左外参及双臂对齐同时恢复。固定Z=101mm结果保留作历史实验。当前部署以本页顶部v3.0.0为准。
+
+八种方案的数学机理、优化变量、标定/验证/在线数据流及结果对比见[八种标定方法机理与数据流](docs/八种标定方法机理与数据流.md)。
+
+基于两臂同型同定位黄球连接件的[21组合共享pF重标定报告](reports/dual_arm_shared_pf_20261020/report.md)：比较独立、完全共享与≤0.5mm安装差异，均未达到双臂留出P95≤1mm，实验时部署保持v2.4.0。
+
+进一步的[18组合共享pF与观测补偿实验](reports/shared_camera_affine_refinement_20261020/report.md)：比较视差、径向及空间多项式补偿。最佳实验候选严格共享pF，右/左臂留出RMS为0.876/0.843mm、P95为1.610/1.577mm；尚未达到双臂P95≤1mm。报告包含完整参数、实验调用示例和逐点验证记录，当时未替换部署参数。
+
+最新[共享pF的Rt退化诊断与联合高斯补偿改进](reports/shared_pf_joint_kernel_20261021/report.md)：量化pF与姿态/外参耦合，联合拟合严格共享pF、各臂仿射映射与共用平滑场。固定候选右/左RMS为0.887/0.841mm、P95为1.611/1.484mm；固定候选和嵌套选型流程均达到原独立pF＋Rt的六项指标。包含完整参数、调用示例及17088条逐点复核；该实验仍非纯Rt模型，尚缺独立实物验收。

@@ -1,0 +1,14 @@
+{
+  "heldout_predictions_recomputed": 12816,
+  "nested_choices_and_scores_verified": true,
+  "both_arms_purged_holdout_and_complete_coverage_verified": true,
+  "all_serialized_models_verified": true,
+  "shared_pf_exact": true,
+  "software_test_cases": 5,
+  "source_script_sha256": "48eb145c1d2202e30ec8060603ed525911e3e4ce47bdac43fc3c75b22f572638",
+  "current_source_matches_fit": true,
+  "deployment_manifest_sha256": "4468b95484fa4042161d678d12614d37b0bff41dae8493dd4ec2d10e93f6c323",
+  "deployment_modified": false,
+  "absolute_accuracy_verified": false,
+  "any_dual_arm_p95_below_1mm": false
+}

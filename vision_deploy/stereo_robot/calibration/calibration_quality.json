@@ -1,0 +1,131 @@
+{
+  "variant": "affine_l60_a3",
+  "source_model_sha256": "ed3f4378f9d78840c9579d20a633bc95262289b613114b34748c775f07a1076c",
+  "comparison_sha256": "4f60a32cc3ec424e206c1b17b3b3e387d74853c115b6ee077f00b1aefa7025af",
+  "candidate_cv": {
+    "right": {
+      "samples": 288,
+      "mean_mm": 0.7817383790817596,
+      "rms_mm": 0.8866629634239717,
+      "median_mm": 0.6870593673800238,
+      "p95_mm": 1.6114740090946504,
+      "max_mm": 2.880588441969989,
+      "axis_bias_mm": [
+        0.014380326075200072,
+        -0.026483375810879596,
+        -0.005265746722971186
+      ],
+      "axis_rms_mm": [
+        0.7185736526008576,
+        0.44155292693313963,
+        0.27359482672817254
+      ],
+      "fraction_within_1mm": 0.78125
+    },
+    "left": {
+      "samples": 424,
+      "mean_mm": 0.733801047697039,
+      "rms_mm": 0.8412812552525104,
+      "median_mm": 0.646884441577316,
+      "p95_mm": 1.4836069008647337,
+      "max_mm": 2.8970293455093,
+      "axis_bias_mm": [
+        -0.0129435442728363,
+        0.021459758342624792,
+        -0.02240879502372657
+      ],
+      "axis_rms_mm": [
+        0.6365948266429551,
+        0.44715589530589145,
+        0.3202386335591824
+      ],
+      "fraction_within_1mm": 0.7900943396226415
+    }
+  },
+  "nested_selection_cv": {
+    "right": {
+      "samples": 288,
+      "mean_mm": 0.7742449110443519,
+      "rms_mm": 0.8742758466240398,
+      "median_mm": 0.6649102730275764,
+      "p95_mm": 1.588025928246446,
+      "max_mm": 2.570990575687695,
+      "axis_bias_mm": [
+        -0.012458331985712574,
+        -0.01796679003189484,
+        -0.00508123481530216
+      ],
+      "axis_rms_mm": [
+        0.7136634739917409,
+        0.43096395822483424,
+        0.26327318243870607
+      ],
+      "fraction_within_1mm": 0.7743055555555556
+    },
+    "left": {
+      "samples": 424,
+      "mean_mm": 0.7279669848211,
+      "rms_mm": 0.8318356837107442,
+      "median_mm": 0.6506412366750369,
+      "p95_mm": 1.5090540518457605,
+      "max_mm": 2.780400286706338,
+      "axis_bias_mm": [
+        -0.013715966475243545,
+        0.032073363435049025,
+        -0.03516762969326963
+      ],
+      "axis_rms_mm": [
+        0.6247780594930469,
+        0.43720205078936114,
+        0.33235124169498986
+      ],
+      "fraction_within_1mm": 0.7900943396226415
+    }
+  },
+  "independent_rigid_baseline_cv": {
+    "right": {
+      "samples": 288,
+      "mean_mm": 0.7943339167668086,
+      "rms_mm": 0.9117630782079348,
+      "median_mm": 0.6826023280591988,
+      "p95_mm": 1.6779424765551372,
+      "max_mm": 3.019876405371766,
+      "axis_bias_mm": [
+        -0.013153095078096368,
+        -0.0040495222304563995,
+        0.012799851059499512
+      ],
+      "axis_rms_mm": [
+        0.7445184129132858,
+        0.4353895219934423,
+        0.2957029045420628
+      ],
+      "fraction_within_1mm": 0.7326388888888888
+    },
+    "left": {
+      "samples": 424,
+      "mean_mm": 0.7598979640254092,
+      "rms_mm": 0.8663692126609635,
+      "median_mm": 0.6603616682292301,
+      "p95_mm": 1.520132017585269,
+      "max_mm": 3.2760428943214364,
+      "axis_bias_mm": [
+        -0.015489543962279388,
+        0.05348265292066416,
+        -0.0017642977399159434
+      ],
+      "axis_rms_mm": [
+        0.6460507050875057,
+        0.48711007396627215,
+        0.3097383975926895
+      ],
+      "fraction_within_1mm": 0.7735849056603774
+    }
+  },
+  "warnings": [
+    "Same sessions repeatedly reused for exploratory model research; nested validation cannot remove cross-round adaptive bias.",
+    "No residual exclusion; both arms purged by 2 positions; no heldout joints or FK used in target inference.",
+    "Empirical field and affine maps are not pure Rt or independently identified physical camera parameters.",
+    "This joint model is deployed; both arm maps were re-estimated, without a fixed prior right anchor."
+  ]
+}

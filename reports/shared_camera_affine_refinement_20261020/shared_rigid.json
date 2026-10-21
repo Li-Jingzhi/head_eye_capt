@@ -1,0 +1,109 @@
+{
+  "variant": "shared_rigid",
+  "correction_kind": "none",
+  "correction_coefficients": [],
+  "map_kind": "rigid",
+  "observation_from_mdh_T": {
+    "right": [
+      [
+        -0.005393867102270633,
+        -0.012611846796481752,
+        -0.9999059193334466,
+        -0.053958496717421464
+      ],
+      [
+        0.7108310737375377,
+        0.7032480204443387,
+        -0.012704579893022205,
+        -0.13812011027975993
+      ],
+      [
+        0.7033420866170473,
+        -0.7108327250918468,
+        0.005171666237944739,
+        0.04780511345184958
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "left": [
+      [
+        -0.009549301178468403,
+        0.012868932072115369,
+        0.9998715924729167,
+        -0.004058148487252315
+      ],
+      [
+        0.7140532689870905,
+        -0.699912428561475,
+        0.015827867639957194,
+        -0.1371862145682239
+      ],
+      [
+        0.7000262422908534,
+        0.714112724247721,
+        -0.0025054284355800344,
+        0.04651728959505626
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "shared_pf_m": [
+    0.000674803641072813,
+    0.0001564489735229362,
+    0.10014343742744415
+  ],
+  "signed_projection_baseline_px_m": 23.78007798163365,
+  "schema": "shared_pf_camera_correction_experiment_v1",
+  "units": "m",
+  "coefficient_prior_sigma": [],
+  "data_residual_scale_m": 0.001,
+  "parameter_count": 15,
+  "optimizer_evaluations": 2,
+  "bound_active": false,
+  "polynomial_center_m": [
+    0.0,
+    0.0,
+    0.4
+  ],
+  "polynomial_scale_m": 0.2,
+  "training_camera_bounds_m": {
+    "right": {
+      "min": [
+        -0.190585606090861,
+        -0.07741519431613123,
+        0.2863616246665093
+      ],
+      "max": [
+        0.13610580003943923,
+        0.2656618657296873,
+        0.6159329669908555
+      ]
+    },
+    "left": {
+      "min": [
+        -0.22765684903115566,
+        -0.09232708361338232,
+        0.23881636923674288
+      ],
+      "max": [
+        0.13195783484580098,
+        0.18634110797882364,
+        0.5615624334568388
+      ]
+    }
+  },
+  "independently_verified": false,
+  "right_anchor_fixed": false,
+  "equation": "camera_corrected=f(observed_camera_xyz); MDH_xyz=inverse(M)@(camera_corrected-t), M=R for rigid models; pF only for calibration flange comparison.",
+  "note": "Common empirical camera correction, not independently identified intrinsics; runtime needs no robot joint angles."
+}
