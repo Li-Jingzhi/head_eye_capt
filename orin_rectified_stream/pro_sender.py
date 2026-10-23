@@ -23,10 +23,12 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--calibration',required=True)
     parser.add_argument('--host',required=True)
+    parser.add_argument('--sensors',nargs=2,type=int,choices=range(10),default=[8,0],metavar=('LEFT','RIGHT'))
     parser.add_argument('--yellow',action='store_true')
     parser.add_argument('--inspect-records')
     parser.add_argument('--inspect-seconds',type=float,default=35)
     args=parser.parse_args()
+    if args.sensors[0]==args.sensors[1]:parser.error('Left and right capture ports must differ')
     calibration_path=Path(args.calibration)
     raw_hash=hashlib.sha256(calibration_path.read_bytes()).hexdigest()
     config=json.loads(calibration_path.read_text())
@@ -72,7 +74,7 @@ def main():
                 pairer.push(eye,frame)
         return Gst.FlowReturn.OK
     capture_descriptions=[]
-    for eye,sensor in enumerate((8,0)):
+    for eye,sensor in enumerate(args.sensors):
         capture_descriptions.append(f'nvarguscamerasrc name=cam{eye} sensor-id={sensor} sensor-mode=0 aeantibanding=2 aelock=false awblock=false ! '
             'video/x-raw(memory:NVMM),width=2560,height=1984,format=NV12,framerate=30/1 ! '
             'nvvidconv ! video/x-raw,width=1280,height=992,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! '
@@ -151,7 +153,10 @@ def main():
             record['pairing_stats']=stats
             record.update(camera_control_policy='auto5s_then_lock_ae_awb_50Hz',camera_controls_readback=control_readback,
                           sensor_actual_exposure_available=False,strict_sample_fps=sample_fps)
-            record.update(sensor_ids=config['sensor_ids'],source_calibration_sha256=raw_hash,
+            # Legacy sensor_ids identify the calibrated cameras; actual transport ports are recorded separately.
+            record.update(sensor_ids=config['sensor_ids'],calibration_sensor_ids=config['sensor_ids'],
+                          capture_sensor_ids=[f'left:csi://{args.sensors[0]}',f'right:csi://{args.sensors[1]}'],
+                          source_calibration_sha256=raw_hash,
                           stereo_model_sha256=stereo_hash if detect else None)
             metadata.sendto(json.dumps(record).encode(),(args.host,5124))
             now=time.monotonic()

@@ -1,5 +1,11 @@
 # head_eye_pro
 
+最新同步状态见[2026-10-23项目记录](reports/project_status_20261023.md)：包含CSI1端口迁移、启动冲突修复，以及仅完成2个有效位置的部分采集归档。完整482点重采尚未完成；10月21日交付ZIP是历史快照，现场使用仓库最新脚本。
+
+2026-10-22端口更新：原双目左眼已从CSI8改接CSI1（J26），右眼CSI0及单目CSI6不变。启动器按`configs/orin_pro_camera_ports.json`采集，标定参数原样保留。
+
+现场操作：[Orin相机与机械臂连接、实时画面及联合控制教程](vision_deploy/stereo_robot/docs/现场连接与联合控制教程.md)。
+
 历史刚体标定流程见：[双目与双臂标定流程](docs/双目与双臂标定流程_20261020.md)，包含实际命令、坐标/pF定义、当前误差结果、部署和实时对比。
 
 新增单目CSI6（`/dev/video6`）自动棋盘采集与独立鱼眼标定，见[CSI6单目标定流程](docs/CSI6单目鱼眼标定流程.md)。
@@ -181,6 +187,8 @@ bash scripts/teach_replay_left.sh teach 2>&1 | (trap '' INT; exec tee runtime/le
 
 ## 左臂黄球实时视觉/FK对比
 
+当前入口使用v3.0.0共享pF联合补偿。历史[独立pF刚体快照](vision_deploy/independent_pf/README.md)及CSI6单目附件继续保留。
+
 推荐直接运行一键Python入口（可在任意目录执行）：
 
 ```bash
@@ -195,7 +203,7 @@ bash scripts/teach_replay_left.sh teach 2>&1 | (trap '' INT; exec tee runtime/le
 /usr/bin/python3 -m interactive_ball_calibration.live_left_compare
 ```
 
-黄球固定在左臂，保持双眼可见；相机严格预检、ARM0 IDLE及MDH匹配通过后进入左臂DragJoint。窗口显示左臂MDH父坐标系下的视觉XYZ、FK球心XYZ、差值Vision−FK及三维距离（mm）。视觉调用原样`vision_deploy`的`StereoRobot.predict(corrected_pixels, arm='left', units='mm')`；输入是上游已修正球心像素，FK使用部署包中当前部署包中的左pF（v3.0.0为共享偏置 `[0.805172,0.250867,100.581848]mm`）。
+黄球固定在左臂，保持双眼可见；相机严格预检、ARM0 IDLE及MDH匹配通过后进入左臂DragJoint。窗口显示左臂MDH父坐标系下的视觉XYZ、FK球心XYZ、差值Vision−FK及三维距离（mm）。视觉调用当前v3.0.0 `vision_deploy/stereo_robot/` 的`StereoRobot.predict(corrected_pixels, arm='left', units='mm')`；输入是上游已修正球心像素，FK使用当前部署中的共享pF `[0.805172,0.250867,100.581848]mm`。
 
 SDK反馈按本机视觉报文接收时刻选最近关节样本（最多50ms差），相机/关节过期时隐藏坐标和误差；这是报文接收时间对齐，不是硬件曝光同步。运动时偏差包含时延影响，应停稳后判断静态误差。Q/Esc关闭对比窗口或Ctrl+C退出会尝试将ARM0回到IDLE并断开SDK；右臂不控制。运行中会替换普通双目预览，本机状态及截图仍写`runtime/rectified_pro/`。部署包代码和参数不修改。
 

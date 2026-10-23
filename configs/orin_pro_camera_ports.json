@@ -1,0 +1,7 @@
+{
+  "schema": "orin_pro_camera_ports_v1",
+  "capture_sensors": [1, 0],
+  "source_calibration_sha256": "65114bda1bc22c954af538e1a710ccd1ec4fb26f2f24f8f9f6da01516d1a80be",
+  "installation_unchanged_confirmed": true,
+  "note": "2026-10-22: user confirmed original cameras and mounting unchanged; original left CSI8 now CSI1/J26, right remains CSI0/J25. CSI6 remains monocular."
+}

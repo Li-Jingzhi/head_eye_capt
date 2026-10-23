@@ -13,7 +13,7 @@ def upright_point(point):
     return tuple(int(round(limit-((value+.5)*.5-.5))) for value,limit in zip(point,(639,495)))
 
 
-def main(overlay=None,should_stop=None):
+def main(overlay=None,should_stop=None,on_ready=None):
     frames=[None,None];counts=[0,0];stamps=[0.,0.];running=True
     latest=[None,0.]
     last_valid=[None,0.]
@@ -46,14 +46,16 @@ def main(overlay=None,should_stop=None):
             frames[eye]=image;counts[eye]+=1;stamps[eye]=time.monotonic()
         capture.release()
     for eye,port in enumerate((5120,5122)):threading.Thread(target=receive,args=(eye,port),daemon=True).start()
-    name='head_eye_pro YELLOW DETECTION - LEFT CSI8 | RIGHT CSI0 - G grid - Q close'
+    name='head_eye_pro YELLOW DETECTION - LEFT | RIGHT - G grid - Q close'
     if overlay is not None:name='LEFT ARM0 - vision_deploy ball XYZ vs FK - Q closes / IDLE'
     cv2.namedWindow(name,cv2.WINDOW_NORMAL);cv2.resizeWindow(name,1280,650 if overlay is not None else 530)
+    if on_ready is not None and (should_stop is None or not should_stop()):on_ready()
     grid=False;last=0;comparison=None
     while should_stop is None or not should_stop():
         tiles=[]
         record=latest[0] if time.monotonic()-latest[1]<1 else None
-        for eye,label in enumerate(('LEFT CSI8','RIGHT CSI0')):
+        ports=record.get('capture_sensor_ids',['left:csi://8','right:csi://0']) if record else ['left:csi://8','right:csi://0']
+        for eye,label in enumerate((f'LEFT CSI{ports[0].rsplit("/",1)[-1]}',f'RIGHT CSI{ports[1].rsplit("/",1)[-1]}')):
             image=np.zeros((496,640,3),np.uint8) if frames[eye] is None else cv2.rotate(frames[eye],cv2.ROTATE_180)
             cv2.putText(image,label+(' STALE' if time.monotonic()-stamps[eye]>1 else ''),(15,28),cv2.FONT_HERSHEY_SIMPLEX,.7,(0,255,0),2)
             if record:

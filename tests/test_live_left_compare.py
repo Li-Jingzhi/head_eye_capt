@@ -1,17 +1,63 @@
 import copy
 import gzip
 import json
+import inspect
 from pathlib import Path
 import sys
 import unittest
 import threading
-from unittest.mock import Mock
+import tempfile
+from unittest.mock import Mock,patch
 import numpy as np
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from interactive_ball_calibration.live_left_compare import LeftComparison,StereoRobot,ROOT,controller_feedback
+from interactive_ball_calibration import live_left_compare as live
 
 
 class LiveLeftTest(unittest.TestCase):
+    def test_takeover_matches_relative_and_absolute_viewer_only(self):
+        with tempfile.TemporaryDirectory() as directory:
+            proc=Path(directory)
+            commands=[['python3','orin_rectified_stream/pro_viewer.py'],
+                      ['python3','-u',str(ROOT/'orin_rectified_stream/pro_viewer.py')],
+                      ['bash','-c','python3 orin_rectified_stream/pro_viewer.py'],
+                      ['python3','-c','orin_rectified_stream/pro_viewer.py'],
+                      ['python3','/other/orin_rectified_stream/pro_viewer.py']]
+            for pid,argv in enumerate(commands,100):
+                process=proc/str(pid);process.mkdir();(process/'cwd').symlink_to(ROOT)
+                (process/'cmdline').write_bytes(b'\0'.join(s.encode() for s in argv)+b'\0')
+            def terminate(pid,sig):(proc/str(pid)/'cmdline').write_bytes(b'')
+            with patch.object(live.os,'kill',side_effect=terminate) as kill,patch.object(live.socket,'socket'):
+                live.stop_standalone_viewers(proc)
+            self.assertEqual(sorted(call.args[0] for call in kill.call_args_list),[100,101])
+
+    def test_takeover_waits_for_socket_release_after_process_exit(self):
+        with tempfile.TemporaryDirectory() as directory,patch.object(live.socket,'socket') as socket,\
+             patch.object(live.time,'sleep') as sleep:
+            socket.return_value.__enter__.return_value.bind.side_effect=[OSError(98,'busy'),None,None,None]
+            live.stop_standalone_viewers(Path(directory))
+            sleep.assert_called_once_with(.05)
+
+    def test_receiver_failure_does_not_start_controller(self):
+        capture=Mock();capture.raw_hash=self.model.raw_sha256
+        with patch.object(live,'Capture',return_value=capture),\
+             patch.object(live,'stop_standalone_viewers'),\
+             patch.object(live.threading,'Thread') as worker,\
+             patch('orin_rectified_stream.pro_viewer.main',side_effect=OSError(98,'Address already in use')):
+            worker.return_value.ident=None
+            with self.assertRaises(OSError):live.main()
+            worker.return_value.start.assert_not_called()
+            worker.return_value.join.assert_not_called()
+            capture.connect.assert_not_called()
+
+    def test_live_uses_v3_source_and_shared_pf_bundle(self):
+        self.assertIn('/vision_deploy/stereo_robot/',inspect.getfile(StereoRobot))
+        self.assertEqual(self.model.bundle_id,'a473f5f64f33b4434e6a8cc9af3164c4ee41f8e0e7616700f40adbff8e002b55')
+        np.testing.assert_allclose(self.model.alignment['flange_to_ball_center_m']['left'],
+            [.0008051722072317555,.0002508674846906257,.10058184753499466])
+        self.assertEqual(self.model.alignment['flange_to_ball_center_m']['left'],
+                         self.model.alignment['flange_to_ball_center_m']['right'])
+
     @classmethod
     def setUpClass(cls):
         path=ROOT/'datasets/left_drag_replay_20261020_110645_673779/replay_capture.jsonl.gz'

@@ -1,0 +1,40 @@
+{
+  "wheel_installed_outside_repository": true,
+  "scipy_present": false,
+  "source_repository_importable": false,
+  "python": "3.12.3",
+  "numpy": "2.5.4",
+  "opencv": "5.0.0",
+  "fused_points_per_arm": 712,
+  "max_abs_difference_from_research_m": {
+    "right": 1.3322676295501878e-15,
+    "left": 1.3322676295501878e-15
+  },
+  "bundle_id": "a473f5f64f33b4434e6a8cc9af3164c4ee41f8e0e7616700f40adbff8e002b55",
+  "camera_and_full_mdh_included": true,
+  "packaged_markdown_documents": 4,
+  "package_version": "3.0.0",
+  "model_variant": "affine_l60_a3",
+  "software_tests_passed": 25,
+  "analysis_regression_tests_passed": 19,
+  "standalone_directory_tests": {
+    "run": 25,
+    "passed": 18,
+    "skipped_source_only": 7
+  },
+  "wheel": "stereo_robot_vision-3.0.0-py3-none-any.whl",
+  "wheel_sha256": "46731fba11e0b3e6f52e4463792f376505243d58c2eb1ee5ff842d1e6f8c3c5a",
+  "archived_corrected_point_observations_reproduced": {
+    "right": 14400,
+    "left": 21200
+  },
+  "shared_pf_m": [
+    0.0008051722072317555,
+    0.0002508674846906257,
+    0.10058184753499466
+  ],
+  "full_repository_suite_passed": false,
+  "full_repository_suite_note": "Full repository suite is not a release gate: historical missing files and unavailable analysis dependencies remain; 25 deployment tests and 19 relevant analysis tests passed.",
+  "hardware_connection_tested": false,
+  "transfer_condition": "Same physical stereo rig/robot and unchanged installation. Other hardware/mounts require recalibration."
+}

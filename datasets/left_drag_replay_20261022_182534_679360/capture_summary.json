@@ -1,0 +1,10 @@
+{
+  "trajectory": "data/left_drag_replay_20261020_110645_673779/taught_trajectory.json",
+  "requested_points": 482,
+  "completed_points": 2,
+  "valid_points": 2,
+  "valid_frames": 100,
+  "interrupted": true,
+  "reason": "Paused after five initial detection failures; indices476 and475 passed before stop. Subsequent restart blocked by sustained camera preflight (23/25 unique PASS per5s). ARM0 returned IDLE.",
+  "rows_preserved": 8
+}

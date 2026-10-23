@@ -12,6 +12,24 @@ launcher=importlib.util.module_from_spec(spec);spec.loader.exec_module(launcher)
 
 
 class LauncherTest(unittest.TestCase):
+    def test_port_mapping_requires_unchanged_installation_and_calibration(self):
+        from orin_rectified_stream.start_pro_rectified import capture_ports,sender_matches_ports
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'configs').mkdir()
+            self.assertEqual(capture_ports(root),[8,0])
+            raw=root/'configs/orin_pro_raw_fisheye_stereo_20261019.json';raw.write_text('{}')
+            value=dict(schema='orin_pro_camera_ports_v1',capture_sensors=[1,0],installation_unchanged_confirmed=True,
+                       source_calibration_sha256=hashlib.sha256(raw.read_bytes()).hexdigest())
+            path=root/'configs/orin_pro_camera_ports.json';path.write_text(json.dumps(value))
+            self.assertEqual(capture_ports(root),[1,0])
+            for changes in [dict(capture_sensors=[1,1]),dict(installation_unchanged_confirmed=False),dict(source_calibration_sha256='wrong')]:
+                path.write_text(json.dumps(dict(value,**changes)))
+                with self.assertRaises(ValueError):capture_ports(root)
+        self.assertFalse(sender_matches_ports('123 python pro_sender.py',[1,0]))
+        self.assertTrue(sender_matches_ports('123 python pro_sender.py',[8,0]))
+        self.assertTrue(sender_matches_ports('123 python pro_sender.py --sensors 1 0',[1,0]))
+        self.assertFalse(sender_matches_ports('123 python pro_sender.py --sensors 1 6',[1,0]))
+
     def test_metadata_age_and_bad_files(self):
         with tempfile.TemporaryDirectory() as directory:
             path=Path(directory)/'status.json'
@@ -63,7 +81,7 @@ class LauncherTest(unittest.TestCase):
         client=Mock()
         hashes='\n'.join(hashlib.sha256((camera.ROOT/name).read_bytes()).hexdigest()+'  file' for name in
             ('configs/orin_pro_raw_fisheye_stereo_20261019.json','configs/orin_pro_rectified_stereo_20261019.json'))
-        with patch.dict(camera.os.environ,{'ORIN_PRO_PASSWORD':'test-only'}),             patch.object(camera.paramiko,'SSHClient',return_value=client),             patch.object(camera,'remote',side_effect=['123\n',hashes]) as remote:
+        with patch.dict(camera.os.environ,{'ORIN_PRO_PASSWORD':'test-only'}),             patch.object(camera.paramiko,'SSHClient',return_value=client),             patch.object(camera,'remote',side_effect=['123 python pro_sender.py --sensors 1 0\n',hashes]) as remote:
             camera.prepare_sender(reuse_running=True)
         self.assertEqual(remote.call_count,2)
         client.open_sftp.assert_not_called();client.close.assert_called_once()

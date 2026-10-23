@@ -1,17 +1,17 @@
 """Live left ball visual/FK comparison through the unmodified vision_deploy API."""
 import argparse
 from collections import deque
+import os
+from pathlib import Path
 import signal
-import subprocess
-import sys
+import socket
 import threading
 import time
 
 import numpy as np
 from .pro_capture import Capture,ROOT,checked,digest,flange_pose,validate_camera
 
-sys.path.insert(0,str(ROOT/'vision_deploy'))
-from stereo_robot import StereoRobot
+from vision_deploy.stereo_robot import StereoRobot
 
 
 class LeftComparison:
@@ -95,6 +95,42 @@ def controller_feedback(capture,comparison,stop,status,failure):
             if capture.robot and capture.robot._connected:capture.robot.unlink()
 
 
+def stop_standalone_viewers(proc_root=Path('/proc')):
+    target=(ROOT/'orin_rectified_stream/pro_viewer.py').resolve()
+    stopped=[]
+    for process in proc_root.iterdir():
+        if not process.name.isdigit():continue
+        try:
+            argv=(process/'cmdline').read_bytes().split(b'\0')
+            if not argv[0].rsplit(b'/',1)[-1].startswith(b'python'):continue
+            arguments=iter(argv[1:])
+            for argument in arguments:
+                if argument in (b'-m',b'-c'):break
+                if argument in (b'-W',b'-X'):
+                    next(arguments,None);continue
+                if argument.startswith(b'-'):continue
+                script=Path(os.fsdecode(argument))
+                if not script.is_absolute():script=(process/'cwd').resolve()/script
+                if script.resolve()==target:
+                    os.kill(int(process.name),signal.SIGTERM);stopped.append(process)
+                break
+        except (OSError,ValueError):continue
+    deadline=time.monotonic()+3
+    def active(process):
+        try:return bool((process/'cmdline').read_bytes())
+        except FileNotFoundError:return False
+    def ports_free():
+        for port in (5120,5122,5124):
+            with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as probe:
+                try:probe.bind(('0.0.0.0',port))
+                except OSError:return False
+        return True
+    # Process cmdline can disappear before the kernel releases its sockets.
+    while any(active(process) for process in stopped) or not ports_free():
+        if time.monotonic()>deadline:raise RuntimeError('Stereo UDP ports 5120/5122/5124 still occupied; close the other receiver')
+        time.sleep(.05)
+
+
 def main():
     model=StereoRobot();comparison=LeftComparison(model)
     args=argparse.Namespace(arm='left',robot_ip='192.168.12.190',
@@ -107,20 +143,16 @@ def main():
     try:
         if digest(args.mdh)!=model.mdh_sha256 or capture.raw_hash!=model.raw_sha256:
             raise ValueError('Live capture geometry differs from vision_deploy bundle')
-        subprocess.run(['pkill','-TERM','-f','[/]orin_rectified_stream/pro_viewer.py'],check=False)
-        for _ in range(20):
-            if subprocess.run(['pgrep','-f','[/]orin_rectified_stream/pro_viewer.py'],stdout=subprocess.DEVNULL).returncode!=0:break
-            time.sleep(.05)
-        else:raise RuntimeError('Previous viewer did not release stereo ports')
+        stop_standalone_viewers()
         if stop.is_set():return
         capture.status('live_comparison_waiting')
         worker=threading.Thread(target=controller_feedback,args=(capture,comparison,stop,status,failure),daemon=True)
-        worker.start()
         from orin_rectified_stream import pro_viewer
-        pro_viewer.main(overlay=lambda record:comparison.overlay(record,status['message']),should_stop=stop.is_set)
+        pro_viewer.main(overlay=lambda record:comparison.overlay(record,status['message']),should_stop=stop.is_set,
+                        on_ready=worker.start)
     finally:
         stop.set();capture.stop=True
-        if worker:worker.join()
+        if worker and worker.ident is not None:worker.join()
         signal.signal(signal.SIGINT,original_int);signal.signal(signal.SIGTERM,original_term)
         capture.status('live_comparison_closed',errors=failure)
 

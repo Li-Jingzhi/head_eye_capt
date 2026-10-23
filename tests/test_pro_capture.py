@@ -20,6 +20,20 @@ def observation(index):
 
 
 class CaptureTest(unittest.TestCase):
+    def test_actual_capture_ports_are_recorded_and_cannot_change_mid_session(self):
+        with tempfile.TemporaryDirectory() as directory:
+            c=Capture.__new__(Capture);c.directory=Path(directory);c.latest=c.directory/'frame.json'
+            c.raw_hash='raw';c.stereo_hash='stereo';c.provenance={}
+            frame=observation(1);frame['capture_sensor_ids']=['left:csi://1','right:csi://0']
+            c.latest.write_text(json.dumps(frame))
+            with patch.object(pro_capture.time,'monotonic_ns',return_value=1100000000):
+                c.camera()
+                self.assertEqual(json.loads((c.directory/'session.json').read_text())['capture_sensor_ids'],frame['capture_sensor_ids'])
+                frame['capture_sensor_ids']=['left:csi://2','right:csi://0'];c.latest.write_text(json.dumps(frame))
+                with self.assertRaisesRegex(ValueError,'changed during session'):c.camera()
+            frame['capture_sensor_ids']=['left:csi://1','right:csi://1']
+            with self.assertRaisesRegex(ValueError,'Invalid actual'):validate_camera(frame,'raw','stereo',1100000000)
+
     def test_fusion_requires50_unique_stationary_frames(self):
         frames=[observation(i) for i in range(50)]
         self.assertEqual(fuse(frames)['valid_frames'],50)

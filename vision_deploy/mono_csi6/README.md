@@ -12,7 +12,7 @@ sha256sum -c SHA256SUMS
 - 采集采用50Hz防频闪，自动适应约5秒后锁定AE/AWB；锁定策略不意味着各相机曝光/增益数值相同。
 - 参数对应未旋转原图。缩放图像时同比例缩放K和新K，D不变；显示转180°放在去畸变之后。
 
-这是独立单目附件，不由 `StereoRobot.predict()` 读取，不修改现行v3.0.0双目参数、清单或API。附件随Git源码目录提供；现有 `dist/` 中v3.0.0 wheel/ZIP是此前的双目发布，不含本附件。
+这是独立单目附件，不由 `StereoRobot.predict()` 读取，不修改现行v3.0.0双目参数、清单或API。附件随Git源码目录和最新交付ZIP提供；wheel本身不包含该独立目录。
 
 ## 在Orin上显示
 
@@ -49,4 +49,4 @@ K, D, new_K = (np.asarray(model[key], dtype=float) for key in ('K', 'D', 'undist
 corrected = cv2.fisheye.undistortImage(raw_image, K, D, Knew=new_K)
 ```
 
-原始图像和场景预览仅保留本机，不随参数上传。[完整报告](../../reports/mono_csi6_20261021/report.md)、[采集流程](../../docs/CSI6单目鱼眼标定流程.md)。误差为同批图像拟合结果，未做独立精度验收，不包含相机到机器人的外参。
+原始图像和场景预览仅保留本机，不随参数上传。[完整报告](标定结果.md)、[采集流程](标定采集流程.md)。误差为同批图像拟合结果，未做独立精度验收，不包含相机到机器人的外参。

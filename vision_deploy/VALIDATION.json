@@ -1,40 +1,58 @@
 {
-  "wheel_installed_outside_repository": true,
-  "scipy_present": false,
-  "source_repository_importable": false,
-  "python": "3.12.3",
-  "numpy": "2.5.4",
-  "opencv": "5.0.0",
-  "fused_points_per_arm": 712,
-  "max_abs_difference_from_research_m": {
-    "right": 1.3322676295501878e-15,
-    "left": 1.3322676295501878e-15
-  },
-  "bundle_id": "a473f5f64f33b4434e6a8cc9af3164c4ee41f8e0e7616700f40adbff8e002b55",
-  "camera_and_full_mdh_included": true,
-  "packaged_markdown_documents": 4,
+  "schema": "vision_deploy_delivery_validation_v1",
+  "delivery_date": "2026-10-21",
   "package_version": "3.0.0",
   "model_variant": "affine_l60_a3",
-  "software_tests_passed": 25,
-  "analysis_regression_tests_passed": 19,
-  "standalone_directory_tests": {
+  "bundle_id": "a473f5f64f33b4434e6a8cc9af3164c4ee41f8e0e7616700f40adbff8e002b55",
+  "wheel": "stereo_robot_vision-3.0.0-py3-none-any.whl",
+  "wheel_sha256": "e6152dc218732fd841404422b509f25fadf2fab669dd6978e5c4939d409f4576",
+  "wheel_installed_outside_repository": true,
+  "wheel_inference_checked": true,
+  "packaged_markdown_documents": 5,
+  "standalone_software_tests": {
     "run": 25,
     "passed": 18,
-    "skipped_source_only": 7
+    "skipped_source_data_only": 7,
+    "failures": 0
   },
-  "wheel": "stereo_robot_vision-3.0.0-py3-none-any.whl",
-  "wheel_sha256": "46731fba11e0b3e6f52e4463792f376505243d58c2eb1ee5ff842d1e6f8c3c5a",
-  "archived_corrected_point_observations_reproduced": {
-    "right": 14400,
-    "left": 21200
+  "field_tool_tests": {
+    "run": 29,
+    "passed": 29,
+    "failures": 0,
+    "hardware_accessed": false
   },
-  "shared_pf_m": [
-    0.0008051722072317555,
-    0.0002508674846906257,
-    0.10058184753499466
+  "mono_csi6_sha256": "dbd8f032ddcdc9259828d8abe171a99fa4d77d754e5c12a7feda3dc317b4fbc9",
+  "stereo_parameter_files_reexported": false,
+  "stereo_runtime_algorithm_modified": false,
+  "source_revision": "471d0ff plus current local field-guide and launcher changes",
+  "optional_tools": "field_tools/head_eye_pro",
+  "included": [
+    "v3 runtime and full calibration",
+    "new wheel",
+    "CSI6 calibration and offline documentation",
+    "field guide",
+    "independent-pF historical snapshot",
+    "optional field acquisition and robot-control sources"
   ],
-  "full_repository_suite_passed": false,
-  "full_repository_suite_note": "Full repository suite is not a release gate: historical missing files and unavailable analysis dependencies remain; 25 deployment tests and 19 relevant analysis tests passed.",
+  "excluded": [
+    "robot vendor SDK binaries",
+    "Orin drivers and JetPack/VPI binaries",
+    "Python dependency installers",
+    "raw images and robot recordings",
+    "runtime snapshots and passwords"
+  ],
+  "independently_verified_accuracy": false,
   "hardware_connection_tested": false,
-  "transfer_condition": "Same physical stereo rig/robot and unchanged installation. Other hardware/mounts require recalibration."
+  "known_source_only_export_check": {
+    "passed": false,
+    "reason": "Floating-point last-bit difference in regenerated arm alignment affects manifest byte hashes",
+    "max_numeric_difference": 2.220446049250313e-16
+  },
+  "notes": [
+    "7 tests require original source datasets/configs and are intentionally skipped for standalone deployment.",
+    "Field tools use an identical copy of v3 runtime/parameters; update both copies together or rebuild.",
+    "Wheel provides stereo inference only; CSI6 and field tools are ZIP folders.",
+    "Previous release evidence is retained separately in RELEASE_VALIDATION_3.0.0.json.",
+    "No physical motion or camera restart was performed during delivery verification."
+  ]
 }

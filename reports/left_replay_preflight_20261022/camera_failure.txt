@@ -1,0 +1,65 @@
+10月 22 18:01:41 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:01:41 orin-agx kernel: ser_x 12-0043: [MAX9295A_8] start streaming!
+10月 22 18:01:41 orin-agx kernel: ser_x 12-0043: i2c-w, 0x0002 = 0x53 err
+10月 22 18:01:41 orin-agx kernel: ser_x 12-0043: i2c-w, 0x02d3 = 0x00 err
+10月 22 18:01:41 orin-agx kernel: shw5g 12-001d: Reconfig cam failure!
+10月 22 18:01:41 orin-agx kernel: shw5g 12-001d: sensor_set_gain: camera addr = 0x0ca1, val = 0x02
+10月 22 18:01:41 orin-agx kernel: shw5g 12-001d: i2c-w, 0x0ca1 = 0x02 err
+10月 22 18:01:41 orin-agx kernel: shw5g 12-001d: sensor_set_gain: GAIN control error
+10月 22 18:01:46 orin-agx kernel: shw5g 12-001d: sensor_set_gain: camera addr = 0x0ca1, val = 0x03
+10月 22 18:01:46 orin-agx kernel: shw5g 12-001d: i2c-w, 0x0ca1 = 0x03 err
+10月 22 18:01:46 orin-agx kernel: shw5g 12-001d: sensor_set_gain: GAIN control error
+10月 22 18:01:46 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:01:46 orin-agx kernel: ser_x 12-0043: [MAX9295A_8] stop streaming!
+10月 22 18:01:46 orin-agx kernel: ser_x 12-0043: i2c-w, 0x02d3 = 0x00 err
+10月 22 18:01:46 orin-agx kernel: ser_x 12-0043: i2c-r, 0x0010 = 0x00 err!
+10月 22 18:01:46 orin-agx kernel: ser_x 12-0043: i2c-w, 0x0002 = 0x43 err
+10月 22 18:01:46 orin-agx kernel: shw5g 12-001d: sensor_power_off:
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: sensor_set_mode: enter, mode_idx:0
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: set mode:0 failure!
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: sensor_set_gain: camera addr = 0x0ca1, val = 0x01
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: i2c-w, 0x0ca1 = 0x01 err
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: sensor_set_gain: GAIN control error
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: sensor_set_exposure: camera coarse_time = 0x752f, shs1 = 0x0d08
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: sensor_set_exposure: camera addr = 0x0ca3, val = 0x0d
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: i2c-w, 0x0ca3 = 0x0d err
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: sensor_set_exposure: set coarse time error
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: stream status:0
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:02:09 orin-agx kernel: ser_x 12-0043: [MAX9295A_8] start streaming!
+10月 22 18:02:09 orin-agx kernel: ser_x 12-0043: i2c-w, 0x0002 = 0x53 err
+10月 22 18:02:09 orin-agx kernel: ser_x 12-0043: i2c-w, 0x02d3 = 0x00 err
+10月 22 18:02:09 orin-agx kernel: shw5g 12-001d: Reconfig cam failure!
+10月 22 18:02:10 orin-agx kernel: max9296 9-0048: [max9296_0] link 0 video lock!
+10月 22 18:02:13 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:02:13 orin-agx kernel: ser_x 12-0043: [MAX9295A_8] stop streaming!
+10月 22 18:02:13 orin-agx kernel: ser_x 12-0043: i2c-w, 0x02d3 = 0x00 err
+10月 22 18:02:13 orin-agx kernel: ser_x 12-0043: i2c-r, 0x0010 = 0x00 err!
+10月 22 18:02:13 orin-agx kernel: ser_x 12-0043: i2c-w, 0x0002 = 0x43 err
+10月 22 18:02:13 orin-agx kernel: shw5g 12-001d: sensor_power_off:
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: sensor_set_mode: enter, mode_idx:0
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: set mode:0 failure!
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: sensor_set_gain: camera addr = 0x0ca1, val = 0x01
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: i2c-w, 0x0ca1 = 0x01 err
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: sensor_set_gain: GAIN control error
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: sensor_set_exposure: camera coarse_time = 0x752f, shs1 = 0x0d08
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: sensor_set_exposure: camera addr = 0x0ca3, val = 0x0d
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: i2c-w, 0x0ca3 = 0x0d err
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: sensor_set_exposure: set coarse time error
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: stream status:0
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:03:00 orin-agx kernel: ser_x 12-0043: [MAX9295A_8] start streaming!
+10月 22 18:03:00 orin-agx kernel: ser_x 12-0043: i2c-w, 0x0002 = 0x53 err
+10月 22 18:03:00 orin-agx kernel: ser_x 12-0043: i2c-w, 0x02d3 = 0x00 err
+10月 22 18:03:00 orin-agx kernel: shw5g 12-001d: Reconfig cam failure!
+10月 22 18:03:01 orin-agx kernel: max9296 9-0048: [max9296_0] link 0 video lock!
+10月 22 18:03:04 orin-agx kernel: shw5g 12-001d: sensor_write_table:i2c write table failed !!
+10月 22 18:03:04 orin-agx kernel: ser_x 12-0043: [MAX9295A_8] stop streaming!
+10月 22 18:03:04 orin-agx kernel: ser_x 12-0043: i2c-w, 0x02d3 = 0x00 err
+10月 22 18:03:04 orin-agx kernel: ser_x 12-0043: i2c-r, 0x0010 = 0x00 err!
+10月 22 18:03:04 orin-agx kernel: ser_x 12-0043: i2c-w, 0x0002 = 0x43 err
+10月 22 18:03:04 orin-agx kernel: shw5g 12-001d: sensor_power_off:

@@ -108,6 +108,12 @@ def validate_camera(frame,raw_hash,stereo_hash,now_ns):
         raise ValueError('Invalid per-camera source identity')
     raw=np.asarray(frame.get('raw_stereo_pixels'),float)
     if raw.shape!=(4,) or not np.isfinite(raw).all():raise ValueError('Invalid raw stereo pixels')
+    if 'capture_sensor_ids' in frame:
+        ports=frame['capture_sensor_ids']
+        if (not isinstance(ports,list) or len(ports)!=2 or
+            any(value not in [f'{side}:csi://{i}' for i in range(10)] for side,value in zip(('left','right'),ports)) or
+            ports[0].rsplit('/',1)[-1]==ports[1].rsplit('/',1)[-1]):
+            raise ValueError('Invalid actual camera capture ports')
     return tuple(frame['source_pts_ns'])
 
 
@@ -155,6 +161,12 @@ class Capture:
 
     def camera(self):
         frame=json.loads(self.latest.read_text());validate_camera(frame,self.raw_hash,self.stereo_hash,time.monotonic_ns())
+        ports=frame.get('capture_sensor_ids',frame['sensor_ids'])
+        previous=self.provenance.get('capture_sensor_ids')
+        if previous is not None and previous!=ports:raise ValueError('Camera capture ports changed during session')
+        if previous is None:
+            self.provenance['capture_sensor_ids']=ports
+            (self.directory/'session.json').write_text(json.dumps(self.provenance,indent=2))
         return frame
 
     def wait_camera(self):

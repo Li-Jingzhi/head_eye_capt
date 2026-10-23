@@ -1,0 +1,63 @@
+{
+  "schema": "head_eye_pro_capture_archive_v1",
+  "capture_session": "left_drag_replay_20261022_182534_679360",
+  "complete": false,
+  "requested_trajectory_points": 482,
+  "arm_side": "left",
+  "arm_index": 0,
+  "mdh_chain": "R.A0",
+  "captured_points": 8,
+  "valid_points": 2,
+  "invalid_points": 6,
+  "recorded_stereo_observations": 155,
+  "valid_position_observations": 100,
+  "unique_source_frames_per_eye": [
+    155,
+    155
+  ],
+  "head_pose_recorded": false,
+  "capture_sensor_ids": [
+    "left:csi://1",
+    "right:csi://0"
+  ],
+  "taught_trajectory_archive": "../left_drag_replay_20261020_110645_673779/taught_trajectory.json.gz",
+  "rejection_reason_counts": {
+    "Exactly50 unique valid frames required": 5,
+    "KeyboardInterrupt: ": 1
+  },
+  "files": [
+    {
+      "file": "replay_capture.jsonl.gz",
+      "compression": "gzip",
+      "uncompressed_bytes": 613414,
+      "uncompressed_sha256": "2d5bdec0c5ab37aa98b2cf26798c328ba8f8f4a5b7eacca303714521de4c91c5",
+      "stored_bytes": 74853,
+      "stored_sha256": "794b06011aac502897a7bd53e576d92bdcf2bd6ee494d180f24f30082fb7e42a"
+    },
+    {
+      "file": "session.json",
+      "compression": "none",
+      "uncompressed_bytes": 678,
+      "uncompressed_sha256": "13f920434092c19e3913d31f25fdf538b42da21f5db84b107b2deec9628cc85d",
+      "stored_bytes": 678,
+      "stored_sha256": "13f920434092c19e3913d31f25fdf538b42da21f5db84b107b2deec9628cc85d"
+    },
+    {
+      "file": "status.json",
+      "compression": "none",
+      "uncompressed_bytes": 24,
+      "uncompressed_sha256": "6dca3613c39d0958f8fadb79695f52214000e3ace05f908da17f5a08ae5cd968",
+      "stored_bytes": 24,
+      "stored_sha256": "6dca3613c39d0958f8fadb79695f52214000e3ace05f908da17f5a08ae5cd968"
+    },
+    {
+      "file": "capture_summary.json",
+      "compression": "none",
+      "uncompressed_bytes": 434,
+      "uncompressed_sha256": "bb6e0c33feb458a6b98c641751b7e4f84ac1cc13831aa90a56d073332226b9d3",
+      "stored_bytes": 434,
+      "stored_sha256": "bb6e0c33feb458a6b98c641751b7e4f84ac1cc13831aa90a56d073332226b9d3"
+    }
+  ],
+  "notes": "Partial stopped replay only; all valid, invalid and interrupted records preserved. No raw images. Not used to recalibrate vision_deploy."
+}

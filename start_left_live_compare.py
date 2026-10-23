@@ -58,7 +58,7 @@ def main():
                     if preview.poll() is not None:raise RuntimeError('双目接收进程退出，请检查相机或显示环境。')
                     if time.monotonic()>deadline:raise RuntimeError('未收到新鲜双目状态，请检查Orin网络和相机。')
                     time.sleep(.1)
-            print('启动左臂ARM0预检、拖动模式及视觉/FK实时对比。Q/Esc或Ctrl+C退出。',flush=True)
+            print('使用vision_deploy v3.0.0（共享pF联合补偿）；启动左臂ARM0预检、拖动及视觉/FK对比。Q/Esc或Ctrl+C退出。',flush=True)
             run_live()
         finally:
             if preview is not None:
